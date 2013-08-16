@@ -1,0 +1,35 @@
+name: JSON API test
+testcases:
+- name: Echo non-existent request body
+  method: POST
+  url: http://localhost:8000/api/echo
+  code: 400
+
+- name: Echo the request body without JSON header
+  method: POST
+  url: http://localhost:8000/api/echo
+  code: 400
+  body: '{"hello": "world"}'
+
+- name: Echo the request body with JSON header
+  method: POST
+  url: http://localhost:8000/api/echo
+  headers:
+    content-type: "application/json"
+  code: 200
+  body: '{"hello": "world"}'
+  json_response_body: '{"hello": "world"}'
+
+- name: Normal API error
+  method: GET
+  url: http://localhost:8000/api/error/normal
+  code: 400
+  on_response: |
+    assert response.json()['code'] == 400
+
+- name: Unexpected error
+  method: GET
+  url: http://localhost:8000/api/error/unexpected
+  code: 500
+  on_response: |
+    assert response.json()['code'] == 500

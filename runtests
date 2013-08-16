@@ -1,0 +1,67 @@
+#!/bin/bash
+
+set -e
+
+function cleanup {
+    set +e
+    echo "Cleaning up..."
+
+    kill `jobs -p`
+    popd
+
+    rm test_project/oz_tests.db
+    rm test_project/static/real
+    rm test_project/static/real2
+}
+
+# Activate virtualenv
+test -d venv || virtualenv --no-site-packages venv
+source venv/bin/activate
+
+# Get the major version of python
+PYTHON_MAJOR_VERSION=`python -c "import sys; sys.stdout.write(str(sys.version_info[0]))"`
+
+# Install the dependencies based on the python version
+if [[ $PYTHON_MAJOR_VERSION -eq "3" ]]; then
+    pip install -Ur etc/requirements-python3.txt
+else
+    pip install -Ur etc/requirements-python2.txt
+fi
+
+pushd test_project
+trap cleanup EXIT
+
+# Setup the database
+PYTHONPATH=..:$PYTHONPATH ../scripts/oz setup_database
+
+# Run the unit
+PYTHONPATH=..:$PYTHONPATH ../scripts/oz test
+
+# Run the server
+PYTHONPATH=..:$PYTHONPATH ../scripts/oz server &
+PING_RETURN_CODE=1
+
+# Wait for the server to finish starting
+set +e
+
+while [ $PING_RETURN_CODE -ne 0 ]; do
+    echo "Waiting for the server to start..."
+    sleep 1
+    curl http://localhost:8000/blink
+    PING_RETURN_CODE=$?
+done
+
+set -e
+
+# Run the integration tests
+PYTHONPATH=..:$PYTHONPATH catnap catnap/bandit.yml --verbose --cookies
+PYTHONPATH=..:$PYTHONPATH catnap catnap/blinks.yml --verbose --cookies
+PYTHONPATH=..:$PYTHONPATH catnap catnap/json_api.yml --verbose
+PYTHONPATH=..:$PYTHONPATH catnap catnap/redis_sessions.yml --verbose --cookies
+PYTHONPATH=..:$PYTHONPATH catnap catnap/sqlalchemy.yml --verbose
+
+if [[ $PYTHON_MAJOR_VERSION -eq "3" ]]; then
+    echo "Skipping AWS CDN tests because it is not supported on python 3.x"
+else
+    PYTHONPATH=..:$PYTHONPATH catnap catnap/aws_cdn.yml --verbose
+fi

@@ -1,0 +1,36 @@
+name: Bandit test
+testcases:
+- name: Get a non-existent experiment
+  method: GET
+  url: http://localhost:8000/experiment/foo
+  code: 404
+
+- name: Leave a non-existent experiment
+  method: DELETE
+  url: http://localhost:8000/experiment/foo
+  code: 200
+
+- name: Choose an experiment value
+  method: POST
+  url: http://localhost:8000/experiment/foo
+
+- name: Get the experiment value
+  method: GET
+  url: http://localhost:8000/experiment/foo
+  on_response: |
+    assert response.text in ["A", "B", "C"], "Expected a response text of A or B or C, but got %s" % response.text
+
+- name: Explicitly set the experiment value
+  method: PUT
+  url: http://localhost:8000/experiment/foo?choice=B
+  code: 200
+
+- name: Get the experiment value
+  method: GET
+  url: http://localhost:8000/experiment/foo
+  response_body: "B"
+
+- name: Leave the experiment
+  method: DELETE
+  url: http://localhost:8000/experiment/foo
+  code: 200

@@ -1,0 +1,17 @@
+name: SQLAlchemy test
+testcases:
+- name: Get a non-existent option
+  method: GET
+  url: http://localhost:8000/db/foo
+  code: 404
+
+- name: Set an option
+  method: PUT
+  url: http://localhost:8000/db/foo?value=bar
+  code: 200
+
+- name: Get an option
+  method: GET
+  url: http://localhost:8000/db/foo
+  code: 200
+  response_body: "bar"

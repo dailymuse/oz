@@ -1,0 +1,72 @@
+name: AWS CDN test
+testcases:
+- name: Delete a non-existent file
+  method: DELETE
+  url: http://localhost:8000/file/unreal
+  code: 404
+
+- name: Get a non-existent file
+  method: GET
+  url: http://localhost:8000/file/unreal
+  code: 404
+
+- name: Put a file
+  method: PUT
+  url: http://localhost:8000/file/real?replace=false
+  body: "Hello, world!"
+  code: 200
+
+- name: Put a file
+  method: PUT
+  url: http://localhost:8000/file/real?replace=true
+  body: "Hello, world 3!"
+  code: 200
+
+- name: Get a file
+  method: GET
+  url: http://localhost:8000/file/real
+  code: 200
+  response_body: "Hello, world 3!"
+
+- name: Copy a file
+  method: PUT
+  url: http://localhost:8000/copy-file/real/real2?replace=false
+  code: 200
+
+- name: Re-copy a file
+  method: PUT
+  url: http://localhost:8000/copy-file/real/real2?replace=true
+  code: 200
+
+- name: Get the copied file
+  method: GET
+  url: http://localhost:8000/file/real2
+  code: 200
+  response_body: "Hello, world 3!"
+
+- name: Get the cache buster for the uploaded file
+  method: GET
+  url: http://localhost:8000/cache-buster/real2
+  code: 200
+  response_body: 26a8ef
+
+- name: Get a non-existent cache buster
+  method: GET
+  url: http://localhost:8000/cache-buster/unreal
+  code: 404
+
+- name: Delete a non-existent cache buster
+  method: GET
+  url: http://localhost:8000/cache-buster/unreal
+  code: 404
+
+- name: Set a cache buster
+  method: PUT
+  url: http://localhost:8000/cache-buster/real3?hash=abcdef
+  code: 200
+
+- name: Get a cache buster
+  method: GET
+  url: http://localhost:8000/cache-buster/real3
+  code: 200
+  response_body: "abcdef"
