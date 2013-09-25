@@ -16,4 +16,5 @@ def random_hex(length):
 def password_hash(password, password_salt=None):
     """Hashes a specified password"""
     password_salt = password_salt or oz.app.settings["session_salt"]
-    return u"sha256!%s" % hashlib.sha256(unicode(password_salt) + unicode(password)).hexdigest()
+    salted_password = "".join([unicode(password_salt), password])
+    return "sha256!%s" % unicode(hashlib.sha256(salted_password.encode("utf-8")).hexdigest())
