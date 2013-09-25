@@ -7,6 +7,7 @@ setup(
     version = version,
     description = "A batteries-included web framework built on Tornado",
     author = "Yusuf Simonson",
+    author_email = 'yusuf@themuse.com',
     url = "http://github.com/dailymuse/oz",
     zip_safe = False,
     
