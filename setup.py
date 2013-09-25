@@ -34,7 +34,6 @@ setup(
 
     package_data = {
         "oz": [
-            "plugins/bandit/assets/*",
             "skeleton/*.py",
             "skeleton/plugin/*.py",
             "skeleton/plugin/tests/*.py",
