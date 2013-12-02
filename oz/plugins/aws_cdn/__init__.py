@@ -129,8 +129,8 @@ class S3File(CDNFile):
 
             self.key.set_contents_from_string(contents, {
                 "Content-Type": guessed_type or "binary/octet-stream",
-                "Cache-Control": "'max-age=155520000, public'",
-                "Expires": "'Sat, 29 Apr 2017 13:31:45-0000 GMT'"
+                "Cache-Control": "max-age=155520000, public",
+                "Expires": "Sat, 29 Apr 2017 13:31:45-0000 GMT"
             })
 
     def contents(self):
