@@ -59,7 +59,7 @@ class BanditCoreTest(unittest.TestCase):
         redis = oz.plugins.redis.create_connection()
         experiment = oz.plugins.bandit.Experiment(redis, "ex-choices")
 
-        self.assertRaises(lambda: experiment.add_choice("illegal name"))
+        self.assertRaises(oz.plugins.bandit.ExperimentException, experiment.add_choice, "illegal name")
         self.assertEqual(experiment.choices(), [])
 
         experiment.add_choice("A")

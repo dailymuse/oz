@@ -17,12 +17,12 @@ class CDNCoreTest(unittest.TestCase):
         self.assertEqual(len(s1), 10)
 
         for c in s1:
-            self.assertIn(c, hexchars)
+            self.assertTrue(c in hexchars, "%s not in %s" % (c, hexchars))
 
         s2 = oz.plugins.redis_sessions.random_hex(10)
         self.assertEqual(len(s2), 10)
 
         for c in s2:
-            self.assertIn(c, hexchars)
+            self.assertTrue(c in hexchars, "%s not in %s" % (c, hexchars))
 
         self.assertNotEqual(s1, s2)

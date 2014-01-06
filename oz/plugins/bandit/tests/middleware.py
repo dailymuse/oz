@@ -52,7 +52,7 @@ class BanditMiddlewareTest(oz.testing.OzTestCase):
         self.http_client.fetch(self.get_url("/bandit?cookie_id=test_bandit"), self.stop, method="POST", body=" ")
         response = self.wait()
         choice = response.body
-        self.assertIn(choice, [b"a", b"b", b"c", b"d", b"e", b"f", b"g", b"h", b"i", b"j"])
+        self.assertTrue(choice in [b"a", b"b", b"c", b"d", b"e", b"f", b"g", b"h", b"i", b"j"], "Invalid choice: %s" % choice)
 
         self.http_client.fetch(self.get_url("/bandit?cookie_id=test_bandit"), self.stop, method="POST", body=" ")
         response = self.wait()
