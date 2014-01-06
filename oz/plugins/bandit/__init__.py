@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
 
-from tornado import escape
+from tornado import escape, util
 from .actions import *
 from .middleware import *
 from .tests import *
@@ -22,6 +22,10 @@ def get_chi_squared(choice1_plays, choice1_rewards, choice2_plays, choice2_rewar
         return (exp_0 - float(choice1_rewards)) ** 2 / exp_0 + (exp_1 - float(choice2_rewards)) ** 2 / exp_1
     else:
         return 0
+
+def parse_json(raw):
+    """Parses raw bytes to a JSON object with unicode strings"""
+    return escape.recursive_unicode(escape.json_decode(raw)) if raw != None else None
 
 class ExperimentException(Exception):
     """
@@ -56,7 +60,7 @@ class Experiment(object):
             raise ExperimentException(self.name, "already exists")
 
         # Add the experiment
-        json = dict(creation_date=unicode(datetime.datetime.now()))
+        json = dict(creation_date=util.unicode_type(datetime.datetime.now()))
         pipe = self.redis.pipeline(transaction=True)
         pipe.sadd(ACTIVE_EXPERIMENTS_REDIS_KEY, self.name)
         pipe.hset(self._redis_key(), "metadata", escape.json_encode(json))
@@ -75,13 +79,11 @@ class Experiment(object):
 
     def metadata(self):
         """Gets the properties associated with this experiment"""
-        raw = self.redis.hget(self._redis_key(), "metadata")
-        return escape.json_decode(raw) if raw != None else None
+        return parse_json(self.redis.hget(self._redis_key(), "metadata"))
 
     def choices(self):
         """Gets the choices available"""
-        choices = self.redis.hget(self._redis_key(), "choices")
-        return escape.json_decode(choices) if choices != None else []
+        return parse_json(self.redis.hget(self._redis_key(), "choices")) or []
 
     def add_choice(self, choice):
         """Adds a choice for the experiment"""
@@ -121,7 +123,7 @@ class Experiment(object):
 
     def get_default_choice(self):
         """Gets the default choice for this experiment"""
-        return self.redis.hget(self._redis_key(), "default-choice")
+        return escape.to_unicode(self.redis.hget(self._redis_key(), "default-choice"))
 
     def set_default_choice(self, choice):
         """Sets the default choice for this experiment"""

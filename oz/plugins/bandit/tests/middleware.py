@@ -52,7 +52,7 @@ class BanditMiddlewareTest(oz.testing.OzTestCase):
         self.http_client.fetch(self.get_url("/bandit?cookie_id=test_bandit"), self.stop, method="POST", body=" ")
         response = self.wait()
         choice = response.body
-        self.assertIn(choice, ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"])
+        self.assertIn(choice, [b"a", b"b", b"c", b"d", b"e", b"f", b"g", b"h", b"i", b"j"])
 
         self.http_client.fetch(self.get_url("/bandit?cookie_id=test_bandit"), self.stop, method="POST", body=" ")
         response = self.wait()
@@ -60,4 +60,4 @@ class BanditMiddlewareTest(oz.testing.OzTestCase):
 
         self.http_client.fetch(self.get_url("/bandit?cookie_id=test_bandit"), self.stop)
         response = self.wait()
-        self.assertEqual(response.body, "2:1")
+        self.assertEqual(response.body, b"2:1")

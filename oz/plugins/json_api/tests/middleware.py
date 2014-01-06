@@ -44,7 +44,7 @@ class ApiMiddlewareTest(oz.testing.OzTestCase):
         self.http_client.fetch(self.get_url('/unknown_error_writer'), self.stop)
         response = self.wait()
         self.assertEqual(response.headers["Content-Type"], "application/json; charset=UTF-8")
-        self.assertTrue("Exception: Test 1" in response.body)
+        self.assertTrue(b"Exception: Test 1" in response.body)
 
         self.http_client.fetch(self.get_url('/api_error_writer'), self.stop)
         response = self.wait()
@@ -60,29 +60,29 @@ class ApiMiddlewareTest(oz.testing.OzTestCase):
         self.http_client.fetch(self.get_url('/response'), self.stop)
         response = self.wait()
         self.assertEqual(response.headers["Content-Type"], "application/json; charset=UTF-8")
-        self.assertEqual(response.body, '{"hello": "world"}')
+        self.assertEqual(response.body, b'{"hello": "world"}')
 
         self.http_client.fetch(self.get_url('/response?callback=foo'), self.stop)
         response = self.wait()
         self.assertEqual(response.headers["Content-Type"], "application/javascript; charset=UTF-8")
-        self.assertEqual(response.body, 'foo({"hello": "world"})')
+        self.assertEqual(response.body, b'foo({"hello": "world"})')
 
         self.http_client.fetch(self.get_url('/response?callback=!!!'), self.stop)
         response = self.wait()
         self.assertEqual(response.headers["Content-Type"], "application/json; charset=UTF-8")
-        self.assertTrue("Invalid callback identifier" in response.body)
+        self.assertTrue(b"Invalid callback identifier" in response.body)
 
     def test_body(self):
         # Invalid: no content-type specified
         self.http_client.fetch(self.get_url('/body'), self.stop, body='{"hello": "world"}', method="PUT")
         response = self.wait()
         self.assertEqual(response.headers["Content-Type"], "application/json; charset=UTF-8")
-        self.assertTrue("JSON body expected" in response.body, msg="Unexpected body: %s" % response.body)
+        self.assertTrue(b"JSON body expected" in response.body, msg="Unexpected body: %s" % response.body)
 
         self.http_client.fetch(self.get_url('/body'), self.stop, body='{"hello": "world"}', method="PUT", headers={"Content-Type": "application/json"})
         response = self.wait()
         self.assertEqual(response.headers["Content-Type"], "application/json; charset=UTF-8")
-        self.assertEqual(response.body, '{"hello": "world"}')
+        self.assertEqual(response.body, b'{"hello": "world"}')
 
 @oz.test
 class NoJSONPApiMiddlewareTest(oz.testing.OzTestCase):
@@ -104,17 +104,17 @@ class NoJSONPApiMiddlewareTest(oz.testing.OzTestCase):
         self.http_client.fetch(self.get_url('/nojsonp_response'), self.stop)
         response = self.wait()
         self.assertEqual(response.headers["Content-Type"], "application/json; charset=UTF-8")
-        self.assertEqual(response.body, '{"hello": "world"}')
+        self.assertEqual(response.body, b'{"hello": "world"}')
 
         self.http_client.fetch(self.get_url('/nojsonp_response?callback=foo'), self.stop)
         response = self.wait()
         self.assertEqual(response.headers["Content-Type"], "application/json; charset=UTF-8")
-        self.assertEqual(response.body, '{"hello": "world"}')
+        self.assertEqual(response.body, b'{"hello": "world"}')
 
         self.http_client.fetch(self.get_url('/nojsonp_response?callback=!!!'), self.stop)
         response = self.wait()
         self.assertEqual(response.headers["Content-Type"], "application/json; charset=UTF-8")
-        self.assertEqual(response.body, '{"hello": "world"}')
+        self.assertEqual(response.body, b'{"hello": "world"}')
 
 @oz.test
 class NoDebugApiMiddlewareTest(oz.testing.OzTestCase):

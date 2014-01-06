@@ -14,10 +14,6 @@ function cleanup {
     rm test_project/static/real2
 }
 
-# Activate virtualenv
-test -d venv || virtualenv --no-site-packages venv
-source venv/bin/activate
-
 # Get the major version of python
 PYTHON_MAJOR_VERSION=`python -c "import sys; sys.stdout.write(str(sys.version_info[0]))"`
 

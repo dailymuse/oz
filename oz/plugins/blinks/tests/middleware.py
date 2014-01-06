@@ -20,4 +20,4 @@ class BlinkMiddlewareTest(oz.testing.OzTestCase):
     def test_blink(self):
         self.http_client.fetch(self.get_url('/'), self.stop)
         response = self.wait()
-        self.assertEqual(response.body, "Blink #? : new_blink")
+        self.assertEqual(response.body, b"Blink #? : new_blink")

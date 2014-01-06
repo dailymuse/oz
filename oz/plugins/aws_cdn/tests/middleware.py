@@ -6,6 +6,7 @@ import collections
 import oz.plugins.redis
 from oz.plugins.aws_cdn import CDNMiddleware
 from oz.plugins.redis import RedisMiddleware
+from tornado import escape
 
 @oz.test
 class CDNMiddlewareTest(oz.testing.OzTestCase):
@@ -16,8 +17,8 @@ class CDNMiddlewareTest(oz.testing.OzTestCase):
     def get_handlers(self):
         class CDNHandler(oz.RequestHandler, RedisMiddleware, CDNMiddleware):
             def put(self):
-                file, value = self.request.body.split(":")
-                self.set_cache_buster(file, value)
+                file, value = self.request.body.split(b":")
+                self.set_cache_buster(escape.to_unicode(file), escape.to_unicode(value))
                 self.finish("ok")
 
         class CacheBusterHandler(CDNHandler):
@@ -43,17 +44,17 @@ class CDNMiddlewareTest(oz.testing.OzTestCase):
     def test_get_cache_buster(self):
         self.http_client.fetch(self.get_url("/cache_buster"), self.stop, method="PUT", body="path/to/file.txt:abcdef")
         response = self.wait()
-        self.assertEqual(response.body, "ok")
+        self.assertEqual(response.body, b"ok")
 
         self.http_client.fetch(self.get_url("/cache_buster?file=path%2Fto%2Ffile.txt"), self.stop)
         response = self.wait()
-        self.assertEqual(response.body, "abcdef")
+        self.assertEqual(response.body, b"abcdef")
 
     def test_static_url(self):
         self.http_client.fetch(self.get_url("/static_url"), self.stop, method="PUT", body="path/to/file2.txt:ghijkl")
         response = self.wait()
-        self.assertEqual(response.body, "ok")
+        self.assertEqual(response.body, b"ok")
 
         self.http_client.fetch(self.get_url("/static_url?file=path%2Fto%2Ffile2.txt"), self.stop)
         response = self.wait()
-        self.assertEqual(response.body, "//fakecdn/path/to/file2.txt?v=ghijkl")
+        self.assertEqual(response.body, b"//fakecdn/path/to/file2.txt?v=ghijkl")

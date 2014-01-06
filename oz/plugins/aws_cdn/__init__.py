@@ -1,11 +1,15 @@
 from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
 
-from boto.s3.connection import S3Connection
+try:
+    from boto.s3.connection import S3Connection
+except ImportError:
+    S3Connection = None
 
 import os
 import hashlib
 import mimetypes
 import oz.app
+from tornado import escape
 
 from .actions import *
 from .middleware import *
@@ -19,7 +23,7 @@ def static_url(redis, path):
 
 def get_cache_buster(redis, path):
     """Gets the cache buster value for a given file path"""
-    return redis.hget("cache-buster:v1", path)
+    return escape.to_unicode(redis.hget("cache-buster:v1", path))
 
 def set_cache_buster(redis, path, hash):
     """Sets the cache buster value for a given file path"""
@@ -31,9 +35,14 @@ def remove_cache_buster(redis, path):
 
 def get_bucket(s3_bucket=None):
     """Gets a bucket from specified settings"""
-    settings = oz.app.settings
-    s3_bucket = s3_bucket or settings["s3_bucket"]
-    return S3Connection(settings["aws_access_key"], settings["aws_secret_key"]).get_bucket(s3_bucket)
+    global S3Connection
+
+    if S3Connection != None:
+        settings = oz.app.settings
+        s3_bucket = s3_bucket or settings["s3_bucket"]
+        return S3Connection(settings["aws_access_key"], settings["aws_secret_key"]).get_bucket(s3_bucket)
+    else:
+        raise Exception("S3 not supported in this environment as boto is not installed")
 
 def get_file(path):
     if oz.app.settings["s3_bucket"]:

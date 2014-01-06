@@ -133,7 +133,7 @@ class RequestHandler(tornado.web.RequestHandler):
 def initialize(config):
     # Load the plugins
     for plugin in config.plugins:
-        __import__(plugin, globals(), locals(), [], -1)
+        __import__(plugin, globals(), locals(), [], 0)
         execute_signal("plugin_loaded", plugin)
 
     # Add the options

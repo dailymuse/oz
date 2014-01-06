@@ -16,7 +16,7 @@ class RedisSessionMiddleware(object):
             self.set_cookie("session_id", session_id, httponly=True)
 
         password_salt = oz.app.settings["session_salt"]
-        return "session:%s:v2" % oz.plugins.redis_sessions.password_hash(password_salt, session_id)
+        return "session:%s:v3" % oz.plugins.redis_sessions.password_hash(session_id, password_salt=password_salt)
 
     def _update_session_expiration(self):
         """

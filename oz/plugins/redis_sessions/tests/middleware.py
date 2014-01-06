@@ -49,50 +49,50 @@ class RedisSessionMiddlewareTest(oz.testing.OzTestCase):
     def test_session_value(self):
         self.http_client.fetch(self.get_url("/set?name=session_value_1&value=bar&cookie_id=test_session_value"), self.stop)
         response = self.wait()
-        self.assertEqual(response.body, "")
+        self.assertEqual(response.body, b"")
 
         self.http_client.fetch(self.get_url("/get?name=session_value_1&cookie_id=test_session_value"), self.stop)
         response = self.wait()
-        self.assertEqual(response.body, "bar")
+        self.assertEqual(response.body, b"bar")
 
         self.http_client.fetch(self.get_url("/get?name=session_value_2&cookie_id=test_session_value"), self.stop)
         response = self.wait()
-        self.assertEqual(response.body, "")
+        self.assertEqual(response.body, b"")
 
         self.http_client.fetch(self.get_url("/get?name=session_value_2&default=bar2&cookie_id=test_session_value"), self.stop)
         response = self.wait()
-        self.assertEqual(response.body, "bar2")
+        self.assertEqual(response.body, b"bar2")
 
     def test_clear_session_value(self):
         self.http_client.fetch(self.get_url("/set?name=clearable_value&value=baz&cookie_id=test_clear_session_value"), self.stop)
         response = self.wait()
-        self.assertEqual(response.body, "")
+        self.assertEqual(response.body, b"")
 
         self.http_client.fetch(self.get_url("/del?name=clearable_value&cookie_id=test_clear_session_value"), self.stop)
         response = self.wait()
-        self.assertEqual(response.body, "")
+        self.assertEqual(response.body, b"")
 
         self.http_client.fetch(self.get_url("/get?name=clearable_value&cookie_id=test_clear_session_value"), self.stop)
         response = self.wait()
-        self.assertEqual(response.body, "")
+        self.assertEqual(response.body, b"")
 
     def test_clear_all_session_values(self):
         self.http_client.fetch(self.get_url("/set?name=clear_all_value_1&value=baz&cookie_id=test_clear_all_session_values"), self.stop)
         response = self.wait()
-        self.assertEqual(response.body, "")
+        self.assertEqual(response.body, b"")
 
         self.http_client.fetch(self.get_url("/set?name=clear_all_value_2&value=baz&cookie_id=test_clear_all_session_values"), self.stop)
         response = self.wait()
-        self.assertEqual(response.body, "")
+        self.assertEqual(response.body, b"")
 
         self.http_client.fetch(self.get_url("/clear?cookie_id=test_clear_all_session_values"), self.stop)
         response = self.wait()
-        self.assertEqual(response.body, "")
+        self.assertEqual(response.body, b"")
 
         self.http_client.fetch(self.get_url("/get?name=clear_all_value_1&cookie_id=test_clear_all_session_values"), self.stop)
         response = self.wait()
-        self.assertEqual(response.body, "")
+        self.assertEqual(response.body, b"")
 
         self.http_client.fetch(self.get_url("/get?name=clear_all_value_2&cookie_id=test_clear_all_session_values"), self.stop)
         response = self.wait()
-        self.assertEqual(response.body, "")
+        self.assertEqual(response.body, b"")

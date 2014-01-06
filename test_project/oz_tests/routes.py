@@ -1,7 +1,7 @@
 """Defines application routes"""
 
 import oz
-import handlers
+from . import handlers
 
 oz.routes(
     (r"^/file/([^/]+)$", handlers.FileHandler),

@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function, with_statement
 import oz
 import random
 import oz.plugins.bandit
+from tornado import escape
 
 class BanditTestingMiddleware(object):
     def __init__(self):
@@ -24,7 +25,7 @@ class BanditTestingMiddleware(object):
 
     def get_experiment_choice(self, experiment):
         """Gets the experiment choice a user is in"""
-        return self.get_session_value(self.session_key(experiment))
+        return escape.to_unicode(self.get_session_value(self.session_key(experiment)))
 
     def choose_experiment(self, name):
         """
