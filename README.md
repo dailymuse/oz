@@ -27,6 +27,10 @@ Then run the application server:
 
     oz server
 
+Alternatively, you can get started using
+[oz-bootstrap](github.com/ysimonson/oz-bootstrap), which provides a more rapid
+means of getting off the ground.
+
 ## Project Structure ##
 
 Once you've created a new project, you'll have a directory structure like so:
