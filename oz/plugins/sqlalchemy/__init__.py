@@ -16,13 +16,19 @@ engine = None
 Session = None
 
 @oz.signal("initialized")
-def initialize(pool_timeout=None):
+def initialize():
     """Initializes a new SQLAlchemy environment"""
 
     global engine, Session
 
-    kwargs = { "echo": oz.app.settings["debug_sql"] }
-    if pool_timeout != None: kwargs["pool_timeout"] = pool_timeout
+    kwargs = dict(echo=oz.app.settings["debug_sql"])
+
+    if oz.app.settings["db_pool_size"]:
+        kwargs["pool_size"] = oz.app.settings["db_pool_size"]
+    if oz.app.settings["db_max_overflow"]:
+        kwargs["max_overflow"] = oz.app.settings["db_max_overflow"]
+    if oz.app.settings["db_pool_timeout"]:
+        kwargs["db_pool_timeout"] = oz.app.settings["db_pool_timeout"]
 
     engine = create_engine(oz.app.settings["db"], **kwargs)
     Session = sessionmaker(bind=engine)
