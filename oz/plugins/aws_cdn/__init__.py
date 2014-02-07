@@ -33,14 +33,14 @@ def remove_cache_buster(redis, path):
     """Removes the cache buster for a given file"""
     redis.hdel("cache-buster:v1", path)
 
-def get_bucket(s3_bucket=None):
+def get_bucket(s3_bucket=None, validate=False):
     """Gets a bucket from specified settings"""
     global S3Connection
 
     if S3Connection != None:
         settings = oz.app.settings
         s3_bucket = s3_bucket or settings["s3_bucket"]
-        return S3Connection(settings["aws_access_key"], settings["aws_secret_key"]).get_bucket(s3_bucket)
+        return S3Connection(settings["aws_access_key"], settings["aws_secret_key"]).get_bucket(s3_bucket, validate=validate)
     else:
         raise Exception("S3 not supported in this environment as boto is not installed")
 
