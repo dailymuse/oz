@@ -2,3 +2,6 @@
 *.pyc
 /venv
 /Oz.egg-info
+/dump.rdb
+/build
+/dist
