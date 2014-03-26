@@ -24,7 +24,18 @@ def server():
         server.serve_forever()
     else:
         application = tornado.web.Application(oz.app.routes, **settings)
-        server = tornado.httpserver.HTTPServer(application)
+
+        if settings["ssl_cert_file"] != None and settings["ssl_key_file"] != None:
+            ssl_options = {
+                "certfile": settings["ssl_cert_file"],
+                "keyfile": settings["ssl_key_file"],
+                "cert_reqs": settings["ssl_cert_reqs"],
+                "ca_certs": settings["ssl_ca_certs"]
+            }
+        else:
+            ssl_options = None
+
+        server = tornado.httpserver.HTTPServer(application, ssl_options=ssl_options)
         server.bind(settings["port"])
 
         if settings["debug"]:
