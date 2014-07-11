@@ -18,6 +18,7 @@ def cache_busting_scan(*prefixes):
 
     settings = oz.app.settings
     redis = oz.plugins.redis.create_connection()
+    pipe = redis.pipeline()
 
     # Get all items that match any of the patterns. Put it in a set to
     # prevent duplicates.
@@ -41,4 +42,6 @@ def cache_busting_scan(*prefixes):
     for f in matches:
         file_hash = f.hash(override=settings.get("hash_override", ""))
         print(file_hash, f.path())
-        oz.plugins.aws_cdn.set_cache_buster(redis, f.path(), file_hash)
+        oz.plugins.aws_cdn.set_cache_buster(pipe, f.path(), file_hash)
+
+    pipe.execute()
