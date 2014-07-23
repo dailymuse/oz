@@ -15,30 +15,32 @@ Base = declarative_base()
 engine = None
 Session = None
 
-@oz.signal("initialized")
-def initialize():
-    """Initializes a new SQLAlchemy environment"""
-
-    global engine, Session
-
-    kwargs = dict(echo=oz.app.settings["debug_sql"])
-
-    if oz.app.settings["db_pool_size"]:
-        kwargs["pool_size"] = oz.app.settings["db_pool_size"]
-    if oz.app.settings["db_max_overflow"]:
-        kwargs["max_overflow"] = oz.app.settings["db_max_overflow"]
-    if oz.app.settings["db_pool_timeout"]:
-        kwargs["db_pool_timeout"] = oz.app.settings["db_pool_timeout"]
-
-    engine = create_engine(oz.app.settings["db"], **kwargs)
-    Session = sessionmaker(bind=engine)
-
 def setup():
     """Initializes the tables if they don't exist already"""
     return Base.metadata.create_all(engine)
 
+def engine():
+    global engine
+
+    if engine == None:
+        kwargs = dict(echo=oz.app.settings["debug_sql"])
+
+        if oz.app.settings["db_pool_size"]:
+            kwargs["pool_size"] = oz.app.settings["db_pool_size"]
+        if oz.app.settings["db_max_overflow"]:
+            kwargs["max_overflow"] = oz.app.settings["db_max_overflow"]
+        if oz.app.settings["db_pool_timeout"]:
+            kwargs["db_pool_timeout"] = oz.app.settings["db_pool_timeout"]
+
+        engine = create_engine(oz.app.settings["db"], **kwargs)
+
+    return engine
+
 def session():
     """Gets a SQLAlchemy session"""
     global Session
-    assert Session != None, "SQLAlchemy has not been initialized"
+
+    if Session == None:
+        Session = sessionmaker(bind=engine())
+
     return Session()
