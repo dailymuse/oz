@@ -17,7 +17,7 @@ Session = None
 
 def setup():
     """Initializes the tables if they don't exist already"""
-    return Base.metadata.create_all(engine)
+    return Base.metadata.create_all(engine())
 
 def engine():
     global engine
