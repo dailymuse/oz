@@ -12,17 +12,17 @@ from .middleware import *
 from .options import *
 
 Base = declarative_base()
-engine = None
-Session = None
+_engine = None
+_session = None
 
 def setup():
     """Initializes the tables if they don't exist already"""
     return Base.metadata.create_all(engine())
 
 def engine():
-    global engine
+    global _engine
 
-    if engine == None:
+    if _engine == None:
         kwargs = dict(echo=oz.app.settings["debug_sql"])
 
         if oz.app.settings["db_pool_size"]:
@@ -32,15 +32,15 @@ def engine():
         if oz.app.settings["db_pool_timeout"]:
             kwargs["db_pool_timeout"] = oz.app.settings["db_pool_timeout"]
 
-        engine = create_engine(oz.app.settings["db"], **kwargs)
+        _engine = create_engine(oz.app.settings["db"], **kwargs)
 
-    return engine
+    return _engine
 
 def session():
     """Gets a SQLAlchemy session"""
-    global Session
+    global _session
 
-    if Session == None:
-        Session = sessionmaker(bind=engine())
+    if _session == None:
+        _session = sessionmaker(bind=engine())
 
-    return Session()
+    return _session()
