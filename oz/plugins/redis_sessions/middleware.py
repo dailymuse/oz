@@ -8,15 +8,15 @@ class RedisSessionMiddleware(object):
     def _session_key(self):
         """Gets the redis key for a session"""
 
-        session_id = self.get_cookie("session_id")
+        session_id = self.get_secure_cookie("session_id")
 
         # Generate a new session if one does not exist yet
-        if session_id == None:
+        if not session_id or len(session_id) != 20:
             session_id = oz.plugins.redis_sessions.random_hex(20)
-            self.set_cookie("session_id", session_id, httponly=True)
+            self.set_secure_cookie("session_id", session_id, httponly=True)
 
         password_salt = oz.app.settings["session_salt"]
-        return "session:%s:v3" % oz.plugins.redis_sessions.password_hash(session_id, password_salt=password_salt)
+        return "session:%s:v4" % oz.plugins.redis_sessions.password_hash(session_id, password_salt=password_salt)
 
     def _update_session_expiration(self):
         """
