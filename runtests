@@ -9,20 +9,10 @@ function cleanup {
     kill `jobs -p`
     popd
 
-    rm test_project/oz_tests.db
-    rm test_project/static/real
-    rm test_project/static/real2
+    rm -f test_project/oz_tests.db
+    rm -f test_project/static/real
+    rm -f test_project/static/real2
 }
-
-# Get the major version of python
-PYTHON_MAJOR_VERSION=`python -c "import sys; sys.stdout.write(str(sys.version_info[0]))"`
-
-# Install the dependencies based on the python version
-if [[ $PYTHON_MAJOR_VERSION -eq "3" ]]; then
-    pip install -Ur etc/requirements-python3.txt
-else
-    pip install -Ur etc/requirements-python2.txt
-fi
 
 pushd test_project
 trap cleanup EXIT
@@ -50,6 +40,8 @@ done
 set -e
 
 # Run the integration tests
+PYTHON_MAJOR_VERSION=`python -c "import sys; sys.stdout.write(str(sys.version_info[0]))"`
+
 PYTHONPATH=..:$PYTHONPATH catnap catnap/bandit.yml --verbose --cookies
 PYTHONPATH=..:$PYTHONPATH catnap catnap/blinks.yml --verbose --cookies
 PYTHONPATH=..:$PYTHONPATH catnap catnap/json_api.yml --verbose
