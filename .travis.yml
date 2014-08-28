@@ -12,3 +12,5 @@ env:
     - TOXENV=py34-tornado401
     - TOXENV=pypy-tornado322
     - TOXENV=pypy-tornado401
+services:
+    - redis-server
