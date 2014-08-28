@@ -1,19 +1,14 @@
 # http://travis-ci.org/#!/dailymuse/oz
 
 language: python
-python:
-    - "2.6"
-    - "2.7"
-    - "3.2"
-    - "3.3"
-    - "pypy"
-services:
-    - redis-server
-env:
-    - TORNADO_VERSION=2.4.1
-    - TORNADO_VERSION=3.0.2
-    - TORNADO_VERSION=3.1.0
 install:
-    - pip install tornado==$TORNADO_VERSION
+    - pip install tox
 script:
-    - ./runtests
+    - tox
+env:
+    - TOXENV=py27-tornado322
+    - TOXENV=py27-tornado401
+    - TOXENV=py34-tornado322
+    - TOXENV=py34-tornado401
+    - TOXENV=pypy-tornado322
+    - TOXENV=pypy-tornado401
