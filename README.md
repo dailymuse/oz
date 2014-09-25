@@ -274,7 +274,7 @@ To add a new signal, decorate a function like so:
     def foo():
         print "Foo was called"
 
-For example, here's the SQLAlchemy initialization signal:
+For example, here's the signal that the SQLAlchemy plugin used to use:
 
     @oz.signal("initialized")
     def initialize(pool_timeout=None):
