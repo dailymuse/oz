@@ -47,7 +47,7 @@ def engine():
         if oz.app.settings["db_max_overflow"]:
             kwargs["max_overflow"] = oz.app.settings["db_max_overflow"]
         if oz.app.settings["db_pool_timeout"]:
-            kwargs["db_pool_timeout"] = oz.app.settings["db_pool_timeout"]
+            kwargs["pool_timeout"] = oz.app.settings["db_pool_timeout"]
 
         _engine = create_engine(oz.app.settings["db"], **kwargs)
         after_fork.registered = True
