@@ -13,6 +13,7 @@ if sys.version_info >= (3,):
         "oz.plugins.redis",
         "oz.plugins.redis_sessions",
         "oz.plugins.sqlalchemy",
+        "oz.plugins.error_pages",
         project_name,
     ]
 else:
@@ -25,6 +26,7 @@ else:
         "oz.plugins.redis",
         "oz.plugins.redis_sessions",
         "oz.plugins.sqlalchemy",
+        "oz.plugins.error_pages",
         project_name,
     ]
 
@@ -37,5 +39,5 @@ app_options = dict(
     xsrf_cookies = False,
     gzip = False,
     session_salt = "some salt",
-    cookie_secret = "abcdef",
+    cookie_secret = "abcdef"
 )

@@ -47,6 +47,7 @@ PYTHONPATH=..:$PYTHONPATH catnap catnap/blinks.yml --verbose --cookies
 PYTHONPATH=..:$PYTHONPATH catnap catnap/json_api.yml --verbose
 PYTHONPATH=..:$PYTHONPATH catnap catnap/redis_sessions.yml --verbose --cookies
 PYTHONPATH=..:$PYTHONPATH catnap catnap/sqlalchemy.yml --verbose
+PYTHONPATH=..:$PYTHONPATH catnap catnap/error_pages.yml --verbose
 
 if [[ $PYTHON_MAJOR_VERSION -eq "3" ]]; then
     echo "Skipping AWS CDN tests because it is not supported on python 3.x"

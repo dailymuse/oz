@@ -12,6 +12,8 @@ oz.routes(
 
     (r"^/blink$", handlers.BlinkHandler),
 
+    (r"^/error$", handlers.HtmlErrorHandler),
+
     (r"^/api/echo$", handlers.EchoApiHandler),
     (r"^/api/error/normal$", handlers.NormalErrorApiHandler),
     (r"^/api/error/unexpected$", handlers.UnexpectedErrorApiHandler),

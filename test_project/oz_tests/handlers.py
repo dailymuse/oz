@@ -3,7 +3,7 @@
 import oz
 import tornado.web
 from .models import *
-from oz.plugins import aws_cdn, bandit, blinks, json_api, redis, redis_sessions, sqlalchemy
+from oz.plugins import aws_cdn, bandit, blinks, json_api, redis, redis_sessions, sqlalchemy, error_pages
 
 class FileHandler(oz.RequestHandler, redis.RedisMiddleware, aws_cdn.CDNMiddleware):
     def get(self, path):
@@ -144,3 +144,7 @@ class DatabaseHandler(oz.RequestHandler, sqlalchemy.SQLAlchemyMiddleware):
 
         value.value = self.get_argument("value")
         self.db().add(value)
+
+class HtmlErrorHandler(oz.RequestHandler, error_pages.ErrorPageMiddleware):
+    def get(self):
+        raise Exception("Uhoh")
