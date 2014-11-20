@@ -359,6 +359,13 @@ setting blinks, which are one-time transactional messages displayed on a
 per-session basis. You can use these to, e.g. give a "you have logged out"
 message to users.
 
+### Pretty error pages (`oz.plugins.error_pages`) ###
+
+Pretty Django-like error pages that are displayed when the server is in debug
+mode. Make sure to copy `oz/plugins/error_pages/error_page.html` to your
+templates directory and specify its path via the `error_pages_template`
+option.
+
 ### JSON API (`oz.plugins.json_api`) ###
 
 Provides a middleware (`oz.plugins.json_api.ApiMiddleware`) that can be applied
