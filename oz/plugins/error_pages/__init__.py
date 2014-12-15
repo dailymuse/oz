@@ -15,7 +15,7 @@ class DebugBreakException(Exception):
 
 def debug():
     """Used to create debug breakpoints in code"""
-    raise error.DebugBreakException()
+    raise DebugBreakException()
 
 class ErrorFrame(object):
     def __init__(self, tback, filename, function, lineno, vars, id, pre_context, context_line, post_context, pre_context_lineno):
@@ -36,7 +36,7 @@ def get_lines_from_file(filename, lineno, context_lines):
     Returns (pre_context_lineno, pre_context, context_line, post_context).
     """
 
-    get_lines = lambda s, e: [linecache.getline(filename, l).rstrip() for l in xrange(s, e)]
+    get_lines = lambda s, e: [linecache.getline(filename, l).rstrip() for l in range(s, e)]
 
     lower_bound = max(1, lineno - context_lines)
     upper_bound = lineno + context_lines

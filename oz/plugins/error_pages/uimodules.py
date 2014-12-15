@@ -33,7 +33,7 @@ class DictTable(tornado.web.UIModule):
     """
 
     def render(self, d, id=None, kls=None):
-        items = sorted(d.iteritems())
+        items = sorted(d.items())
 
         if items:
             rows = []
