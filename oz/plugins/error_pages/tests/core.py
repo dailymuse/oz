@@ -17,8 +17,8 @@ class ErrorPagesCoreTest(unittest.TestCase):
         except Exception as e:
             _, _, tback = sys.exc_info()
             filename = tback.tb_frame.f_code.co_filename
-            pre_context_lineno, pre_context, context_line, post_context = oz.plugins.error_pages.get_lines_from_file(filename, 2, 7)
-            self.assertEqual(pre_context_lineno, 0)
+            pre_context_lineno, pre_context, context_line, post_context = oz.plugins.error_pages.get_lines_from_file(filename, 3, 7)
+            self.assertEqual(pre_context_lineno, 1)
             self.assertEqual(pre_context, ['from __future__ import absolute_import, division, print_function, with_statement, unicode_literals', ''])
             self.assertEqual(context_line, 'import oz.plugins.error_pages')
             self.assertEqual(post_context, ['import oz', 'import unittest', 'import sys', '', 'class Stringable(object):', '    def __str__(self):'])
