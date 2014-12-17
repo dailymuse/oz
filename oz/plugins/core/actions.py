@@ -40,7 +40,7 @@ def server():
 
         if settings["debug"]:
             if settings["server_workers"] != 1:
-                print >> sys.stderr, "WARNING: Debug is enabled, but multiple server workers have been configured. Only one server worker can run in debug mode."
+                print("WARNING: Debug is enabled, but multiple server workers have been configured. Only one server worker can run in debug mode.")
 
             server.start(1)
         else:
