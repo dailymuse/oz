@@ -9,8 +9,6 @@ def main():
     Script for running actions that are not part of a project's manager.py
     """
 
-    sys.path.insert(0, ".")
-
     try:
         import config
     except ImportError:
