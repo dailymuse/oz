@@ -18,13 +18,13 @@ pushd test_project
 trap cleanup EXIT
 
 # Setup the database
-PYTHONPATH=..:$PYTHONPATH ../scripts/oz setup_database
+PYTHONPATH=..:$PYTHONPATH oz setup_database
 
 # Run the unit
-PYTHONPATH=..:$PYTHONPATH ../scripts/oz test
+PYTHONPATH=..:$PYTHONPATH oz test
 
 # Run the server
-PYTHONPATH=..:$PYTHONPATH ../scripts/oz server &
+PYTHONPATH=..:$PYTHONPATH oz server &
 PING_RETURN_CODE=1
 
 # Wait for the server to finish starting
