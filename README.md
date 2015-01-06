@@ -76,7 +76,7 @@ Oz has two built-in actions that are always available:
 * `init` - starts a new project
 * `explore` - explores a plugin
 
-There is furthermore a core plugin (`oz.plugins.core`) that is added by
+There is furthermore a core plugin (`oz.core`) that is added by
 default to any new project (although can be replaced.) It provides three new
 actions:
 
@@ -107,7 +107,7 @@ takes a single route specification, or `oz.routes`, which takes many.
 
 An example handler using API middleware:
 
-    class ExampleApiHandler(oz.RequestHandler, oz.plugins.json_api.ApiMiddleware):
+    class ExampleApiHandler(oz.RequestHandler, oz.json_api.ApiMiddleware):
         def get(self):
             self.respond({"foo": "bar"})
 
@@ -260,43 +260,6 @@ a tornado template, you could call `HelloModule` like so:
 
 Which will print `Hello, Jose!` in the template.
 
-## Signals ##
-
-Like flask, oz adds signals, which are callbacks executed when certain events
-occur. Unlike middleware triggers, these are application-wide; e.g. a signal
-called `initialized` is fired after all the plugins are loaded and before an
-action is executed. The SQLAlchemy plugin listens for this signal to setup a
-global context required by SQLAlchemy.
-
-To add a new signal, decorate a function like so:
-
-    @oz.signal("signal-name")
-    def foo():
-        print "Foo was called"
-
-For example, here's the signal that the SQLAlchemy plugin used to use:
-
-    @oz.signal("initialized")
-    def initialize(pool_timeout=None):
-        global engine, Session
-
-        kwargs = { "echo": oz.runtime.settings["debug_sql"] }
-        if pool_timeout != None: kwargs["pool_timeout"] = pool_timeout
-
-        engine = create_engine(oz.runtime.settings["db"], **kwargs)
-        Session = sessionmaker(bind=engine)
-
-Currently, two signals are used by oz itself:
-
-* `plugin_loaded` - Fired after a plugin is loaded. Note that this will be
-  before the entire application context is available, and there will be no
-  application settings.
-* `initialized` - Fired after all the plugins are loaded, and before an action
-  is run.
-
-You can fire off your own signals by calling
-`oz.execute_signal("signal name", *args, **kwargs)`.
-
 ## Built-In Plugins ##
 
 Oz comes with a number of built-in plugins to faciliate rapid development. You
@@ -306,9 +269,9 @@ can get details of what these plugins expose via:
 
 Example:
 
-    oz explore oz.plugins.core
+    oz explore oz.core
 
-### Core (`oz.plugins.core`) ###
+### Core (`oz.core`) ###
 
 This should be included in every project, unless you really want to modify the
 default actions or options. The core plugin includes three actions: one for
@@ -316,7 +279,7 @@ running the application server (`server`), one for starting a repl with access
 to the application context (`repl`), and one for running the unit tests
 (`test`).
 
-### AWS CDN (`oz.plugins.aws_cdn`) ###
+### AWS CDN (`oz.aws_cdn`) ###
 
 This plugin uses AWS infrastructure to serve static assets. Static assets are
 hosted on S3 and served with a far-future expiration time. Cache busters are
@@ -342,53 +305,53 @@ This command will re-compute the cache busters for somefile.txt and all files
 in path/to/otherfiles/.
 
 A number of utility functions for S3 and cache buster manipulation are
-provided in the plugin (`oz.plugins.aws_cdn`). A middleware
-(`oz.plugins.aws_cdn.CDNMiddleware`) provides shortcuts to these functions
+provided in the plugin (`oz.aws_cdn`). A middleware
+(`oz.aws_cdn.CDNMiddleware`) provides shortcuts to these functions
 through request handler helpers, by using the application options.
 
-### Bandit (`oz.plugins.bandit`) ###
+### Bandit (`oz.bandit`) ###
 
 Adds
 [bandit testing](http://untyped.com/untyping/2011/02/11/stop-ab-testing-and-make-out-like-a-bandit/)
 functionality to a site, which are similar to A/B tests.
 
-### Blinks (`oz.plugins.blinks`) ###
+### Blinks (`oz.blinks`) ###
 
-Provides a middleware (`oz.plugins.blinks.BlinkMiddleware`) for getting and
+Provides a middleware (`oz.blinks.BlinkMiddleware`) for getting and
 setting blinks, which are one-time transactional messages displayed on a
 per-session basis. You can use these to, e.g. give a "you have logged out"
 message to users.
 
-### Pretty error pages (`oz.plugins.error_pages`) ###
+### Pretty error pages (`oz.error_pages`) ###
 
 Pretty Django-like error pages that are displayed when the server is in debug
-mode. Make sure to copy `oz/plugins/error_pages/error_page.html` to your
+mode. Make sure to copy `oz/error_pages/error_page.html` to your
 templates directory and specify its path via the `error_pages_template`
 option.
 
-### JSON API (`oz.plugins.json_api`) ###
+### JSON API (`oz.json_api`) ###
 
-Provides a middleware (`oz.plugins.json_api.ApiMiddleware`) that can be applied
+Provides a middleware (`oz.json_api.ApiMiddleware`) that can be applied
 on API-based request handlers that speak JSON(P). API-based request handlers can
-raise `oz.plugins.json_api.ApiError` to provide standardized JSON(P) error
+raise `oz.json_api.ApiError` to provide standardized JSON(P) error
 messages.
 
-### Redis (`oz.plugins.redis`) ###
+### Redis (`oz.redis`) ###
 
-Provides a middleware (`oz.plugins.redis.RedisMiddleware`) that will provide a
+Provides a middleware (`oz.redis.RedisMiddleware`) that will provide a
 redis connection as a request handler helper.
 
-### Redis Sessions (`oz.plugins.redis_sessions`) ###
+### Redis Sessions (`oz.redis_sessions`) ###
 
 Provides user sessions that are tied to a redis connection. Requires the redis
 middleware. Session manipulation functionality is exposed through request
 handler helpers on the middleware
-(`oz.plugins.redis_sessions.RedisSessionMiddleware`).
+(`oz.redis_sessions.RedisSessionMiddleware`).
 
-### SQLAlchemy (`oz.plugins.sqlalchemy`) ###
+### SQLAlchemy (`oz.sqlalchemy`) ###
 
 Adds SQLAlchemy support, with per-request database transactions (SQLAlchemy
 sessions). Transactions will be committed if a request handler returns a
 status code between 200 and 399, and rollback otherwise. You can access the
 SQLAlchemy session via `self.db()` once the middleware is attached
-(`oz.plugins.sqlalchemy.SQLAlchemyMiddleware`).
+(`oz.sqlalchemy.SQLAlchemyMiddleware`).
