@@ -1,8 +1,7 @@
 from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
 
-import oz.app
-import inspect
 import oz
+import inspect
 
 def explore_dict(d):
     if len(d):
@@ -33,14 +32,14 @@ def explore(plugin_name):
        module = getattr(module, sub_module_name)
 
     print("Actions")
-    explore_dict(oz.app.actions)
+    explore_dict(oz._actions)
 
     print("\nUIModules")
-    explore_dict(oz.app.uimodules)
+    explore_dict(oz._uimodules)
 
     print("\nRoutes")
-    if oz.app.routes:
-        for route in oz.app.routes:
+    if oz._routes:
+        for route in oz._routes:
             print("- %s" % route[0])
             print("  - request handler: %s" % route[1])
 
@@ -50,8 +49,8 @@ def explore(plugin_name):
         print("  None")
 
     print("\nOptions")
-    if oz.app.options:
-        for option_name, option_params in oz.app.options.items():
+    if oz._options:
+        for option_name, option_params in oz._options.items():
             print("- %s" % option_name)
 
             for option_param_name, option_param in option_params.items():
@@ -60,8 +59,8 @@ def explore(plugin_name):
         print("  None")
 
     print("\nTests")
-    if oz.app.tests:
-        for test in oz.app.tests:
+    if oz._tests:
+        for test in oz._tests:
             print("- %s" % test.__name__)
     else:
         print("  None")

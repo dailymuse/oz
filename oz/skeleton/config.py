@@ -1,7 +1,7 @@
 project_name = "__PROJECT_NAME__"
 
 plugins = [
-    "oz.plugins.core",
+    "oz.core",
     project_name,
 ]
 

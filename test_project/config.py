@@ -6,27 +6,27 @@ project_name = "oz_tests"
 # python 3.x compatible
 if sys.version_info >= (3,):
     plugins = [
-        "oz.plugins.bandit",
-        "oz.plugins.blinks",
-        "oz.plugins.core",
-        "oz.plugins.json_api",
-        "oz.plugins.redis",
-        "oz.plugins.redis_sessions",
-        "oz.plugins.sqlalchemy",
-        "oz.plugins.error_pages",
+        "oz.bandit",
+        "oz.blinks",
+        "oz.core",
+        "oz.json_api",
+        "oz.redis",
+        "oz.redis_sessions",
+        "oz.sqlalchemy",
+        "oz.error_pages",
         project_name,
     ]
 else:
     plugins = [
-        "oz.plugins.aws_cdn",
-        "oz.plugins.bandit",
-        "oz.plugins.blinks",
-        "oz.plugins.core",
-        "oz.plugins.json_api",
-        "oz.plugins.redis",
-        "oz.plugins.redis_sessions",
-        "oz.plugins.sqlalchemy",
-        "oz.plugins.error_pages",
+        "oz.aws_cdn",
+        "oz.bandit",
+        "oz.blinks",
+        "oz.core",
+        "oz.json_api",
+        "oz.redis",
+        "oz.redis_sessions",
+        "oz.sqlalchemy",
+        "oz.error_pages",
         project_name,
     ]
 

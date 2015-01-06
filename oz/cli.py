@@ -1,5 +1,4 @@
 import oz
-import oz.app
 import oz.admin_actions
 import sys
 import optfn
@@ -25,7 +24,7 @@ def main():
 
     if config:
         oz.initialize(config)
-        actions.extend(oz.app.actions.values())
+        actions.extend(oz._actions.values())
 
     retr = optfn.run(actions)
 

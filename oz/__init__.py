@@ -7,12 +7,19 @@ import tornado.options
 import inspect
 import functools
 import collections
-from . import app
 
 # On trigger execution, trigger listeners can return this to notify the
 # request handler to cancel execution of the next functions in the trigger
 # chain.
 break_trigger = object()
+
+_actions = {}
+_uimodules = {}
+_routes = []
+_options = {}
+_tests = []
+settings = {}
+signals = {}
 
 def _add_to_dict(type, container, name, value):
     """
@@ -27,25 +34,25 @@ def _add_to_dict(type, container, name, value):
 
 def action(fun):
     """Exposes an action"""
-    _add_to_dict("Action", app.actions, fun.__name__, fun)
+    _add_to_dict("Action", _actions, fun.__name__, fun)
     return fun
 
 def uimodule(cls):
     """Exposes a UIModule"""
-    _add_to_dict("UIModules", app.uimodules, cls.__name__, cls)
+    _add_to_dict("UIModules", _uimodules, cls.__name__, cls)
     return cls
 
 def route(new_route):
     """Exposes a route"""
-    app.routes.append(new_route)
+    _routes.append(new_route)
 
 def routes(*new_routes):
     """Exposes a list of routes"""
-    app.routes.extend(new_routes)
+    _routes.extend(new_routes)
 
 def option(name, **args):
     """Exposes an option"""
-    _add_to_dict("Option", app.options, name, args)
+    _add_to_dict("Option", _options, name, args)
 
 def options(**kwargs):
     """Exposes several options"""
@@ -54,16 +61,16 @@ def options(**kwargs):
 
 def test(cls):
     """Exposes a unit test class, to be run on the `test` action."""
-    app.tests.append(cls)
+    _tests.append(cls)
     return cls
 
 def signal(name):
     """Adds a function to be executed on a signal"""
     def wrapper(fn):
-        if not name in app.signals:
-            app.signals[name] = []
+        if not name in signals:
+            signals[name] = []
 
-        app.signals[name].append(fn)
+        signals[name].append(fn)
         return fn
 
     return wrapper
@@ -137,17 +144,17 @@ def initialize(config):
         execute_signal("plugin_loaded", plugin)
 
     # Add the options
-    for option_name, option_kwargs in app.options.items():
+    for option_name, option_kwargs in _options.items():
         tornado.options.define(option_name, **option_kwargs)
 
     for key, value in config.app_options.items():
         setattr(tornado.options.options, key, value)
 
     # Generate the application settings
-    settings = dict((key, getattr(tornado.options.options, key)) for key in app.options.keys())
+    global settings
+    settings = dict((key, getattr(tornado.options.options, key)) for key in _options.keys())
     settings["project_name"] = config.project_name
-    settings["ui_modules"] = app.uimodules
-    app.settings = settings
+    settings["ui_modules"] = _uimodules
 
     execute_signal("initialized")
 
@@ -157,5 +164,5 @@ def execute_signal(name, *args, **kwargs):
     args/kwargs
     """
 
-    for callback in app.signals.get(name, []):
+    for callback in signals.get(name, []):
         callback(*args, **kwargs)

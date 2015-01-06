@@ -3,7 +3,6 @@ from __future__ import absolute_import, division, print_function, with_statement
 import tornado.web
 import tornado.testing
 import oz
-import oz.app
 import collections
 import operator
 
@@ -25,15 +24,15 @@ class OzTestCase(tornado.testing.AsyncHTTPTestCase):
     def setUp(self):
         super(OzTestCase, self).setUp()
 
-        self.old_settings = oz.app.settings
+        self.old_settings = oz.settings
 
-        new_settings = dict(oz.app.settings)
+        new_settings = dict(oz.settings)
         new_settings.update(self.forced_settings)
-        oz.app.settings = new_settings
+        oz.settings = new_settings
 
     def tearDown(self):
         super(OzTestCase, self).tearDown()
-        oz.app.settings = self.old_settings
+        oz.settings = self.old_settings
 
     def get_app(self):
         self.app = tornado.web.Application(self.get_handlers(), **self.get_app_kwargs())
@@ -43,7 +42,7 @@ class OzTestCase(tornado.testing.AsyncHTTPTestCase):
         raise NotImplementedError()
 
     def get_app_kwargs(self):
-        return oz.app.settings
+        return oz.settings
 
 class FakeCookiesHandler(oz.RequestHandler):
     """
