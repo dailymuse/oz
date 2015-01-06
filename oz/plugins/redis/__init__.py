@@ -8,7 +8,7 @@ from .options import *
 
 _cached_connection = None
 
-def create_connection():
+def create_connection(**kwargs):
     """Sets up a redis configuration"""
 
     global _cached_connection
@@ -21,7 +21,8 @@ def create_connection():
             host=settings["redis_host"],
             port=settings["redis_port"],
             db=settings["redis_db"],
-            password=settings["redis_password"]
+            password=settings["redis_password"],
+            decode_responses=settings["redis_decode_responses"],
         )
 
         if settings["redis_cache_connections"]:
