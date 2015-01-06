@@ -14,20 +14,19 @@ setup(
     packages = [
         "oz",
         "oz.admin_actions",
-        "oz.plugins",
-        "oz.plugins.aws_cdn",
-        "oz.plugins.aws_cdn.tests",
-        "oz.plugins.bandit",
-        "oz.plugins.bandit.tests",
-        "oz.plugins.blinks",
-        "oz.plugins.blinks.tests",
-        "oz.plugins.core",
-        "oz.plugins.json_api",
-        "oz.plugins.json_api.tests",
-        "oz.plugins.redis",
-        "oz.plugins.redis_sessions",
-        "oz.plugins.redis_sessions.tests",
-        "oz.plugins.sqlalchemy",
+        "oz.aws_cdn",
+        "oz.aws_cdn.tests",
+        "oz.bandit",
+        "oz.bandit.tests",
+        "oz.blinks",
+        "oz.blinks.tests",
+        "oz.core",
+        "oz.json_api",
+        "oz.json_api.tests",
+        "oz.redis",
+        "oz.redis_sessions",
+        "oz.redis_sessions.tests",
+        "oz.sqlalchemy",
     ],
 
     package_data = {
@@ -44,9 +43,9 @@ setup(
     ],
 
     extras_require = {
-        "oz.plugins.aws_cdn": ["boto>=2.9.7"],
-        "oz.plugins.redis": ["redis>=2.6.0"],
-        "oz.plugins.sqlalchemy": ["sqlalchemy>=0.7.8"]
+        "oz.aws_cdn": ["boto>=2.9.7"],
+        "oz.redis": ["redis>=2.6.0"],
+        "oz.sqlalchemy": ["sqlalchemy>=0.7.8"]
     },
 
     entry_points = {
