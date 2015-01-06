@@ -19,7 +19,6 @@ _routes = []
 _options = {}
 _tests = []
 settings = {}
-signals = {}
 
 def _add_to_dict(type, container, name, value):
     """
@@ -63,17 +62,6 @@ def test(cls):
     """Exposes a unit test class, to be run on the `test` action."""
     _tests.append(cls)
     return cls
-
-def signal(name):
-    """Adds a function to be executed on a signal"""
-    def wrapper(fn):
-        if not name in signals:
-            signals[name] = []
-
-        signals[name].append(fn)
-        return fn
-
-    return wrapper
 
 class RequestHandler(tornado.web.RequestHandler):
     def __init__(self, *args, **kwargs):
@@ -141,7 +129,6 @@ def initialize(config):
     # Load the plugins
     for plugin in config.plugins:
         __import__(plugin, globals(), locals(), [], 0)
-        execute_signal("plugin_loaded", plugin)
 
     # Add the options
     for option_name, option_kwargs in _options.items():
@@ -155,14 +142,3 @@ def initialize(config):
     settings = dict((key, getattr(tornado.options.options, key)) for key in _options.keys())
     settings["project_name"] = config.project_name
     settings["ui_modules"] = _uimodules
-
-    execute_signal("initialized")
-
-def execute_signal(name, *args, **kwargs):
-    """
-    Executes a signal, running all of the associated callbacks with the given
-    args/kwargs
-    """
-
-    for callback in signals.get(name, []):
-        callback(*args, **kwargs)
