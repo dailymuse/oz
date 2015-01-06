@@ -2,10 +2,11 @@ from __future__ import absolute_import, division, print_function, with_statement
 
 import oz
 import oz.testing
-import oz.json_api
+
+from oz.json_api import ApiMiddleware, ApiError
 import tornado.escape
 
-class ApiMiddlewareTestHandler(oz.RequestHandler, oz.json_api.ApiMiddleware):
+class ApiMiddlewareTestHandler(oz.RequestHandler, ApiMiddleware):
     def initialize(self, *args, **kwargs):
         super(ApiMiddlewareTestHandler, self).initialize(*args, **kwargs)
 
@@ -22,7 +23,7 @@ class ApiMiddlewareTest(oz.testing.OzTestCase):
 
         class ApiErrorWritingApiHandler(ApiMiddlewareTestHandler):
             def get(self):
-                raise oz.json_api.ApiError("Test 2", code=401)
+                raise ApiError("Test 2", code=401)
 
         class ResponseApiHandler(ApiMiddlewareTestHandler):
             def get(self):
@@ -124,7 +125,7 @@ class NoDebugApiMiddlewareTest(oz.testing.OzTestCase):
     def get_handlers(self):
         class NoDebugErrorWritingApiHandler(ApiMiddlewareTestHandler):
             def get(self):
-                raise oz.json_api.ApiError("Test 3", code=401)
+                raise ApiError("Test 3", code=401)
 
         return [
             ("/nodebug_api_error_writer", NoDebugErrorWritingApiHandler),

@@ -3,7 +3,7 @@
 import oz
 import tornado.web
 from .models import *
-from oz.plugins import aws_cdn, bandit, blinks, json_api, redis, redis_sessions, sqlalchemy, error_pages
+from oz import aws_cdn, bandit, blinks, json_api, redis, redis_sessions, sqlalchemy, error_pages
 
 class FileHandler(oz.RequestHandler, redis.RedisMiddleware, aws_cdn.CDNMiddleware):
     def get(self, path):

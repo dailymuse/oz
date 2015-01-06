@@ -1,9 +1,9 @@
 """Defines application models"""
 
-from oz.plugins import sqlalchemy
+import oz.sqlalchemy
 from sqlalchemy import Column, Integer, String, Boolean, Enum, ForeignKey, Date
 
-class Option(sqlalchemy.Base):
+class Option(oz.sqlalchemy.Base):
     __tablename__ = "options"
     id = Column(Integer, primary_key=True)
     key = Column(String(100), nullable=False)
