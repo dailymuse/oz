@@ -13,11 +13,22 @@ import collections
 # chain.
 break_trigger = object()
 
+# Mapping of action name -> callback
 _actions = {}
+
+# Mapping of uimodule name -> class
 _uimodules = {}
+
+# List of routes
 _routes = []
+
+# Mapping of option name -> parameters
 _options = {}
+
+# List of test classes
 _tests = []
+
+# Mapping of setting name -> value
 settings = {}
 
 def _add_to_dict(type, container, name, value):
