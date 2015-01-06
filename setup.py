@@ -13,7 +13,6 @@ setup(
     
     packages = [
         "oz",
-        "oz.admin_actions",
         "oz.aws_cdn",
         "oz.aws_cdn.tests",
         "oz.bandit",
