@@ -7,5 +7,6 @@ oz.options(
     redis_host = dict(type=str, default="localhost", help="Redis host"),
     redis_port = dict(type=int, default=6379, help="Redis port"),
     redis_db = dict(type=int, default=0, help="Redis database number"),
-    redis_password = dict(type=str, default=None, help="Password to the redis database")
+    redis_password = dict(type=str, default=None, help="Password to the redis database"),
+    redis_decode_responses = dict(type=bool, default=False, help="Whether to decode redis responses automatically. Keep this False if you're handling binary data in redis."),
 )

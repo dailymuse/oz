@@ -62,7 +62,7 @@ class CDNFile(object):
 
     def hash(self, override=""):
         """Creates a cache buster value for the file"""
-        return hashlib.md5(override + self.contents()).hexdigest()[:6]
+        return hashlib.md5(override.encode('utf-8') + self.contents()).hexdigest()
 
     def path(self):
         """Gets the path of the file"""
