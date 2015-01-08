@@ -1,13 +1,7 @@
-#!/usr/bin/env python
-
-from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
-
-import os
 import oz
 import oz.app
 import oz.admin_actions
 import sys
-import inspect
 import optfn
 
 def main():
@@ -23,7 +17,7 @@ def main():
         # Hack to notify the user that config.py wasn't found if they're not
         # running a built-in action
         if len(sys.argv) > 1 and sys.argv[1] not in ["init", "explore"]:
-            print("config.py not found", file=sys.stderr)
+            raise
         
         config = None
 
@@ -43,6 +37,3 @@ def main():
         sys.exit(retr)
     else:
         raise Exception("Unexpected return value from action: %s" % retr)
-
-if __name__ == "__main__":
-    main()

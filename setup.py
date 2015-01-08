@@ -29,8 +29,6 @@ setup(
         "oz.plugins.redis_sessions.tests",
         "oz.plugins.sqlalchemy",
     ],
-    
-    scripts = ["scripts/oz"],
 
     package_data = {
         "oz": [
@@ -49,5 +47,9 @@ setup(
         "oz.plugins.aws_cdn": ["boto>=2.9.7"],
         "oz.plugins.redis": ["redis>=2.6.0"],
         "oz.plugins.sqlalchemy": ["sqlalchemy>=0.7.8"]
+    },
+
+    entry_points = {
+        "console_scripts": ["oz = oz.cli:main"]
     }
 )
