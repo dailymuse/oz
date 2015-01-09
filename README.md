@@ -6,8 +6,7 @@ for [tornado](https://github.com/facebook/tornado)-based projects.
 Oz applications are composed entirely of plugins that allow you to easily
 share and re-use logic across sites.
 
-Requires tornado >= 2.4. Template helpers are known not to work on tornado
-2.3.
+Requires tornado >= 3.1.
 
 ## Getting Started ##
 
