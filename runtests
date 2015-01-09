@@ -17,14 +17,22 @@ function cleanup {
 pushd test_project
 trap cleanup EXIT
 
+PYTHON_MAJOR_VERSION=`python -c "import sys; sys.stdout.write(str(sys.version_info[0]))"`
+
+if [[ $PYTHON_MAJOR_VERSION -eq "3" ]]; then
+    export OZ_PLUGINS=oz.bandit,oz.blinks,oz.core,oz.json_api,oz.redis,oz.redis_sessions,oz.sqlalchemy,oz.error_pages,oz_tests
+else
+    export OZ_PLUGINS=oz.aws_cdn,oz.bandit,oz.blinks,oz.core,oz.json_api,oz.redis,oz.redis_sessions,oz.sqlalchemy,oz.error_pages,oz_tests
+fi
+
 # Setup the database
-PYTHONPATH=..:$PYTHONPATH oz setup_database
+oz setup_database
 
 # Run the unit
-PYTHONPATH=..:$PYTHONPATH oz test
+oz test
 
 # Run the server
-PYTHONPATH=..:$PYTHONPATH oz server &
+oz server &
 PING_RETURN_CODE=1
 
 # Wait for the server to finish starting
@@ -40,8 +48,6 @@ done
 set -e
 
 # Run the integration tests
-PYTHON_MAJOR_VERSION=`python -c "import sys; sys.stdout.write(str(sys.version_info[0]))"`
-
 PYTHONPATH=..:$PYTHONPATH catnap catnap/bandit.yml --verbose --cookies
 PYTHONPATH=..:$PYTHONPATH catnap catnap/blinks.yml --verbose --cookies
 PYTHONPATH=..:$PYTHONPATH catnap catnap/json_api.yml --verbose

@@ -7,6 +7,7 @@ import tornado.options
 import inspect
 import functools
 import collections
+import os
 
 # On trigger execution, trigger listeners can return this to notify the
 # request handler to cancel execution of the next functions in the trigger
@@ -21,9 +22,6 @@ _uimodules = {}
 
 # List of routes
 _routes = []
-
-# Mapping of option name -> parameters
-_options = {}
 
 # List of test classes
 _tests = []
@@ -62,7 +60,7 @@ def routes(*new_routes):
 
 def option(name, **args):
     """Exposes an option"""
-    _add_to_dict("Option", _options, name, args)
+    tornado.options.define(name, **args)
 
 def options(**kwargs):
     """Exposes several options"""
@@ -73,6 +71,10 @@ def test(cls):
     """Exposes a unit test class, to be run on the `test` action."""
     _tests.append(cls)
     return cls
+
+def plugin(namespace):
+    """Loads an oz plugin"""
+    __import__(namespace, globals(), locals(), [], 0)
 
 class RequestHandler(tornado.web.RequestHandler):
     def __init__(self, *args, **kwargs):
@@ -136,20 +138,23 @@ class RequestHandler(tornado.web.RequestHandler):
         if self.trigger("write_error", *args, **kwargs):
             super(RequestHandler, self).write_error(*args, **kwargs)
 
-def initialize(config):
+def initialize():
+    # Parse the necessary environment variables
+    plugins_str = os.environ.get("OZ_PLUGINS", "oz.core")
+    plugins = plugins_str.split(",")
+
+    config_files_str = os.environ.get("OZ_CONFIG", "config.py")
+    config_files = config_files_str.split(",")
+
     # Load the plugins
-    for plugin in config.plugins:
-        __import__(plugin, globals(), locals(), [], 0)
+    for p in plugins:
+        plugin(p)
 
-    # Add the options
-    for option_name, option_kwargs in _options.items():
-        tornado.options.define(option_name, **option_kwargs)
-
-    for key, value in config.app_options.items():
-        setattr(tornado.options.options, key, value)
+    # Parse the config files
+    for config_file in config_files:
+        tornado.options.parse_config_file(config_file)
 
     # Generate the application settings
     global settings
-    settings = dict((key, getattr(tornado.options.options, key)) for key in _options.keys())
-    settings["project_name"] = config.project_name
+    settings = tornado.options.options.as_dict()
     settings["ui_modules"] = _uimodules

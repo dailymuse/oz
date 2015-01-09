@@ -37,7 +37,7 @@ setup(
     },
 
     install_requires = [
-        "tornado>=3.1.0",
+        "tornado>=3.1",
         "optfn==0.4.1"
     ],
 
