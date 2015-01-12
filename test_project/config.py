@@ -1,9 +1,0 @@
-port = 8000
-debug = True
-db = "sqlite:///oz_tests.db"
-static_path = "static"
-template_path = "templates"
-xsrf_cookies = False
-gzip = False
-session_salt = "some salt"
-cookie_secret = "abcdef"

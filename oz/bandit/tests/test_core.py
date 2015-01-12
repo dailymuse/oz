@@ -5,7 +5,7 @@ import oz.redis
 import unittest
 
 @oz.test
-class ChiSquaredTest(unittest.TestCase):
+class ChiSquaredTestCase(unittest.TestCase):
     def test_get_chi_squared(self):
 
         # Make sure it returns 0 for an experiment with no results
@@ -16,9 +16,9 @@ class ChiSquaredTest(unittest.TestCase):
         self.assertEqual(round(csq, 3), 0.328)
 
 @oz.test
-class BanditCoreTest(unittest.TestCase):
+class BanditCoreTestCase(unittest.TestCase):
     def tearDown(self):
-        super(BanditCoreTest, self).tearDown()
+        super(BanditCoreTestCase, self).tearDown()
         
         # Clean up just in case there's keys still lying around
         redis = oz.redis.create_connection()

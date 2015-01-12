@@ -11,7 +11,7 @@ class ApiMiddlewareTestHandler(oz.RequestHandler, ApiMiddleware):
         super(ApiMiddlewareTestHandler, self).initialize(*args, **kwargs)
 
 @oz.test
-class ApiMiddlewareTest(oz.testing.OzTestCase):
+class ApiMiddlewareTestCase(oz.testing.OzTestCase):
     forced_settings = {
         "allow_jsonp": True
     }
@@ -34,20 +34,18 @@ class ApiMiddlewareTest(oz.testing.OzTestCase):
                 self.respond(self.body())
 
         return [
-            ("/unknown_error_writer", UnknownErrorWritingApiHandler),
-            ("/api_error_writer", ApiErrorWritingApiHandler),
+            ("/unknown-error", UnknownErrorWritingApiHandler),
+            ("/api-error", ApiErrorWritingApiHandler),
             ("/response", ResponseApiHandler),
             ("/body", BodyApiHandler),
         ]
 
     def test_error_writer(self):
-        self.http_client.fetch(self.get_url('/unknown_error_writer'), self.stop)
-        response = self.wait()
+        response = self.request("/unknown-error")
         self.assertEqual(response.headers["Content-Type"], "application/json; charset=UTF-8")
         self.assertTrue(b"Exception: Test 1" in response.body)
 
-        self.http_client.fetch(self.get_url('/api_error_writer'), self.stop)
-        response = self.wait()
+        response = self.request("/api-error")
         json = tornado.escape.json_decode(response.body)
         self.assertEqual(response.code, 401)
         self.assertEqual(response.headers["Content-Type"], "application/json; charset=UTF-8")
@@ -57,35 +55,30 @@ class ApiMiddlewareTest(oz.testing.OzTestCase):
 
     def test_respond(self):
         # Checks w/ JSONP support
-        self.http_client.fetch(self.get_url('/response'), self.stop)
-        response = self.wait()
+        response = self.request("/response")
         self.assertEqual(response.headers["Content-Type"], "application/json; charset=UTF-8")
         self.assertEqual(response.body, b'{"hello": "world"}')
 
-        self.http_client.fetch(self.get_url('/response?callback=foo'), self.stop)
-        response = self.wait()
+        response = self.request("/response?callback=foo")
         self.assertEqual(response.headers["Content-Type"], "application/javascript; charset=UTF-8")
         self.assertEqual(response.body, b'foo({"hello": "world"})')
 
-        self.http_client.fetch(self.get_url('/response?callback=!!!'), self.stop)
-        response = self.wait()
+        response = self.request('/response?callback=!!!')
         self.assertEqual(response.headers["Content-Type"], "application/json; charset=UTF-8")
         self.assertTrue(b"Invalid callback identifier" in response.body)
 
     def test_body(self):
         # Invalid: no content-type specified
-        self.http_client.fetch(self.get_url('/body'), self.stop, body='{"hello": "world"}', method="PUT")
-        response = self.wait()
+        response = self.request('/body', body='{"hello": "world"}', method="PUT")
         self.assertEqual(response.headers["Content-Type"], "application/json; charset=UTF-8")
         self.assertTrue(b"JSON body expected" in response.body, msg="Unexpected body: %s" % response.body)
 
-        self.http_client.fetch(self.get_url('/body'), self.stop, body='{"hello": "world"}', method="PUT", headers={"Content-Type": "application/json"})
-        response = self.wait()
+        response = self.request('/body', body='{"hello": "world"}', method="PUT", headers={"Content-Type": "application/json"})
         self.assertEqual(response.headers["Content-Type"], "application/json; charset=UTF-8")
         self.assertEqual(response.body, b'{"hello": "world"}')
 
 @oz.test
-class NoJSONPApiMiddlewareTest(oz.testing.OzTestCase):
+class NoJSONPApiMiddlewareTestCase(oz.testing.OzTestCase):
     forced_settings = {
         "allow_jsonp": False
     }
@@ -96,28 +89,25 @@ class NoJSONPApiMiddlewareTest(oz.testing.OzTestCase):
                 self.respond({"hello": "world"})
 
         return [
-            ("/nojsonp_response", NoJSONPResponseApiHandler),
+            ("/nojsonp-response", NoJSONPResponseApiHandler),
         ]
 
     def test_respond(self):
         # Checks w/o JSONP support
-        self.http_client.fetch(self.get_url('/nojsonp_response'), self.stop)
-        response = self.wait()
+        response = self.request('/nojsonp-response')
         self.assertEqual(response.headers["Content-Type"], "application/json; charset=UTF-8")
         self.assertEqual(response.body, b'{"hello": "world"}')
 
-        self.http_client.fetch(self.get_url('/nojsonp_response?callback=foo'), self.stop)
-        response = self.wait()
+        response = self.request('/nojsonp-response?callback=foo')
         self.assertEqual(response.headers["Content-Type"], "application/json; charset=UTF-8")
         self.assertEqual(response.body, b'{"hello": "world"}')
 
-        self.http_client.fetch(self.get_url('/nojsonp_response?callback=!!!'), self.stop)
-        response = self.wait()
+        response = self.request('/nojsonp-response?callback=!!!')
         self.assertEqual(response.headers["Content-Type"], "application/json; charset=UTF-8")
         self.assertEqual(response.body, b'{"hello": "world"}')
 
 @oz.test
-class NoDebugApiMiddlewareTest(oz.testing.OzTestCase):
+class NoDebugApiMiddlewareTestCase(oz.testing.OzTestCase):
     forced_settings = {
         "debug": False
     }
@@ -128,12 +118,11 @@ class NoDebugApiMiddlewareTest(oz.testing.OzTestCase):
                 raise ApiError("Test 3", code=401)
 
         return [
-            ("/nodebug_api_error_writer", NoDebugErrorWritingApiHandler),
+            ("/nodebug-api-error", NoDebugErrorWritingApiHandler),
         ]
 
     def test_error_writer(self):
-        self.http_client.fetch(self.get_url('/nodebug_api_error_writer'), self.stop)
-        response = self.wait()
+        response = self.request('/nodebug-api-error')
         json = tornado.escape.json_decode(response.body)
         self.assertEqual(response.code, 401)
         self.assertEqual(response.headers["Content-Type"], "application/json; charset=UTF-8")

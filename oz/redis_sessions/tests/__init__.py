@@ -1,2 +1,2 @@
-from .middleware import *
-from .core import *
+from .test_middleware import *
+from .test_core import *

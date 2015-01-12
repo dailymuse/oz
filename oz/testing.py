@@ -44,6 +44,10 @@ class OzTestCase(tornado.testing.AsyncHTTPTestCase):
     def get_app_kwargs(self):
         return oz.settings
 
+    def request(self, path, **kwargs):
+        self.http_client.fetch(self.get_url(path), self.stop, **kwargs)
+        return self.wait()
+
 class FakeCookiesHandler(oz.RequestHandler):
     """
     A request handler that has a pseudo-cookie storage engine. Used because

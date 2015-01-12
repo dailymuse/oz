@@ -7,7 +7,7 @@ from oz.redis_sessions import RedisSessionMiddleware
 from oz.redis import RedisMiddleware
 
 @oz.test
-class RedisSessionMiddlewareTest(oz.testing.OzTestCase):
+class RedisSessionMiddlewareTestCase(oz.testing.OzTestCase):
     forced_settings = {
         "session_salt": "abc",
         "session_time": 60 * 1000
@@ -38,7 +38,7 @@ class RedisSessionMiddlewareTest(oz.testing.OzTestCase):
         ]
 
     def tearDown(self):
-        super(RedisSessionMiddlewareTest, self).tearDown()
+        super(RedisSessionMiddlewareTestCase, self).tearDown()
         
         # Clean up just in case there's keys still lying around
         redis = oz.redis.create_connection()
@@ -47,52 +47,40 @@ class RedisSessionMiddlewareTest(oz.testing.OzTestCase):
             redis.delete(key)
 
     def test_session_value(self):
-        self.http_client.fetch(self.get_url("/set?name=session_value_1&value=bar&cookie_id=test_session_value"), self.stop)
-        response = self.wait()
+        response = self.request("/set?name=session_value_1&value=bar&cookie_id=test_session_value")
         self.assertEqual(response.body, b"")
 
-        self.http_client.fetch(self.get_url("/get?name=session_value_1&cookie_id=test_session_value"), self.stop)
-        response = self.wait()
+        response = self.request("/get?name=session_value_1&cookie_id=test_session_value")
         self.assertEqual(response.body, b"bar")
 
-        self.http_client.fetch(self.get_url("/get?name=session_value_2&cookie_id=test_session_value"), self.stop)
-        response = self.wait()
+        response = self.request("/get?name=session_value_2&cookie_id=test_session_value")
         self.assertEqual(response.body, b"")
 
-        self.http_client.fetch(self.get_url("/get?name=session_value_2&default=bar2&cookie_id=test_session_value"), self.stop)
-        response = self.wait()
+        response = self.request("/get?name=session_value_2&default=bar2&cookie_id=test_session_value")
         self.assertEqual(response.body, b"bar2")
 
     def test_clear_session_value(self):
-        self.http_client.fetch(self.get_url("/set?name=clearable_value&value=baz&cookie_id=test_clear_session_value"), self.stop)
-        response = self.wait()
+        response = self.request("/set?name=clearable_value&value=baz&cookie_id=test_clear_session_value")
         self.assertEqual(response.body, b"")
 
-        self.http_client.fetch(self.get_url("/del?name=clearable_value&cookie_id=test_clear_session_value"), self.stop)
-        response = self.wait()
+        response = self.request("/del?name=clearable_value&cookie_id=test_clear_session_value")
         self.assertEqual(response.body, b"")
 
-        self.http_client.fetch(self.get_url("/get?name=clearable_value&cookie_id=test_clear_session_value"), self.stop)
-        response = self.wait()
+        response = self.request("/get?name=clearable_value&cookie_id=test_clear_session_value")
         self.assertEqual(response.body, b"")
 
     def test_clear_all_session_values(self):
-        self.http_client.fetch(self.get_url("/set?name=clear_all_value_1&value=baz&cookie_id=test_clear_all_session_values"), self.stop)
-        response = self.wait()
+        response = self.request("/set?name=clear_all_value_1&value=baz&cookie_id=test_clear_all_session_values")
         self.assertEqual(response.body, b"")
 
-        self.http_client.fetch(self.get_url("/set?name=clear_all_value_2&value=baz&cookie_id=test_clear_all_session_values"), self.stop)
-        response = self.wait()
+        response = self.request("/set?name=clear_all_value_2&value=baz&cookie_id=test_clear_all_session_values")
         self.assertEqual(response.body, b"")
 
-        self.http_client.fetch(self.get_url("/clear?cookie_id=test_clear_all_session_values"), self.stop)
-        response = self.wait()
+        response = self.request("/clear?cookie_id=test_clear_all_session_values")
         self.assertEqual(response.body, b"")
 
-        self.http_client.fetch(self.get_url("/get?name=clear_all_value_1&cookie_id=test_clear_all_session_values"), self.stop)
-        response = self.wait()
+        response = self.request("/get?name=clear_all_value_1&cookie_id=test_clear_all_session_values")
         self.assertEqual(response.body, b"")
 
-        self.http_client.fetch(self.get_url("/get?name=clear_all_value_2&cookie_id=test_clear_all_session_values"), self.stop)
-        response = self.wait()
+        response = self.request("/get?name=clear_all_value_2&cookie_id=test_clear_all_session_values")
         self.assertEqual(response.body, b"")

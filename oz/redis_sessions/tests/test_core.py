@@ -5,7 +5,7 @@ import oz
 import unittest
 
 @oz.test
-class CDNCoreTest(unittest.TestCase):
+class CDNCoreTestCase(unittest.TestCase):
     def test_password_hash(self):
         hash = oz.redis_sessions.password_hash("bar", password_salt="foo")
         self.assertEqual(hash, "sha256!c3ab8ff13720e8ad9047dd39466b3c8974e592c2fa383d4a3960714caef0c4f2")

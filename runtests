@@ -7,56 +7,16 @@ function cleanup {
     echo "Cleaning up..."
 
     kill `jobs -p`
-    popd
-
-    rm -f test_project/oz_tests.db
-    rm -f test_project/static/real
-    rm -f test_project/static/real2
+    rm static/*
+    #rm -f test_project/oz_tests.db
 }
 
-pushd test_project
 trap cleanup EXIT
 
-PYTHON_MAJOR_VERSION=`python -c "import sys; sys.stdout.write(str(sys.version_info[0]))"`
+export OZ_PLUGINS=oz.aws_cdn,oz.bandit,oz.blinks,oz.core,oz.json_api,oz.redis,oz.redis_sessions,oz.sqlalchemy,oz.error_pages
+export OZ_CONFIG=etc/config.py
 
-if [[ $PYTHON_MAJOR_VERSION -eq "3" ]]; then
-    export OZ_PLUGINS=oz.bandit,oz.blinks,oz.core,oz.json_api,oz.redis,oz.redis_sessions,oz.sqlalchemy,oz.error_pages,oz_tests
-else
-    export OZ_PLUGINS=oz.aws_cdn,oz.bandit,oz.blinks,oz.core,oz.json_api,oz.redis,oz.redis_sessions,oz.sqlalchemy,oz.error_pages,oz_tests
-fi
-
-# Setup the database
-oz setup_database
+echo $OZ_CONFIG
 
 # Run the unit
 oz test
-
-# Run the server
-oz server &
-PING_RETURN_CODE=1
-
-# Wait for the server to finish starting
-set +e
-
-while [ $PING_RETURN_CODE -ne 0 ]; do
-    echo "Waiting for the server to start..."
-    sleep 1
-    curl http://localhost:8000/blink
-    PING_RETURN_CODE=$?
-done
-
-set -e
-
-# Run the integration tests
-PYTHONPATH=..:$PYTHONPATH catnap catnap/bandit.yml --verbose --cookies
-PYTHONPATH=..:$PYTHONPATH catnap catnap/blinks.yml --verbose --cookies
-PYTHONPATH=..:$PYTHONPATH catnap catnap/json_api.yml --verbose
-PYTHONPATH=..:$PYTHONPATH catnap catnap/redis_sessions.yml --verbose --cookies
-PYTHONPATH=..:$PYTHONPATH catnap catnap/sqlalchemy.yml --verbose
-PYTHONPATH=..:$PYTHONPATH catnap catnap/error_pages.yml --verbose
-
-if [[ $PYTHON_MAJOR_VERSION -eq "3" ]]; then
-    echo "Skipping AWS CDN tests because it is not supported on python 3.x"
-else
-    PYTHONPATH=..:$PYTHONPATH catnap catnap/aws_cdn.yml --verbose
-fi

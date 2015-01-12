@@ -113,7 +113,7 @@ class LocalFile(CDNFile):
                 f.write(contents)
 
     def contents(self):
-        with open(self.full_path, "r") as f:
+        with open(self.full_path, "rb") as f:
             return f.read()
 
     def exists(self):

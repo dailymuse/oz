@@ -1,4 +1,4 @@
 """Defines unit tests"""
 
-from .core import *
-from .middleware import *
+from .test_core import *
+from .test_middleware import *

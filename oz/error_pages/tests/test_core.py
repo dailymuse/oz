@@ -10,7 +10,7 @@ class Stringable(object):
         return "Hi!"
 
 @oz.test
-class ErrorPagesCoreTest(unittest.TestCase):
+class ErrorPagesCoreTestCase(unittest.TestCase):
     def test_get_lines_from_file(self):
         try:
             raise Exception()

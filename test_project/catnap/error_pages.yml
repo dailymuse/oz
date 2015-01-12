@@ -1,8 +1,0 @@
-name: Error page test
-testcases:
-- name: Get error page
-  method: GET
-  url: http://localhost:8000/error
-  code: 500
-  response_headers:
-    content-type: text/html; charset=UTF-8

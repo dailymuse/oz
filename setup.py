@@ -26,6 +26,8 @@ setup(
         "oz.redis_sessions",
         "oz.redis_sessions.tests",
         "oz.sqlalchemy",
+        "oz.error_pages",
+        "oz.error_pages.tests",
     ],
 
     package_data = {
