@@ -5,6 +5,8 @@ import optfn
 import sys
 
 def main():
+    sys.path.append(".")
+    
     oz.initialize()
     retr = optfn.run(list(oz._actions.values()))
 
