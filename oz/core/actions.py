@@ -6,29 +6,14 @@ import tornado.ioloop
 import tornado.httpserver
 import wsgiref.simple_server
 import oz
-import oz.testing
 import sys
 import shutil
 import unittest
-import inspect
 import os
 import functools
 import re
-from tornado import options
 
 VALID_PROJECT_NAME = re.compile("^\w+$")
-
-def explore_dict(d):
-    if len(d):
-        for value in d.values():
-            doc = getattr(value, "__doc__")
-
-            if doc:
-                print("- %s: %s" % (value.__name__, doc))
-            else:
-                print("- %s" % value.__name__)
-    else:
-        print("  None")
 
 def check_path(path, otherwise):
     """
@@ -55,52 +40,6 @@ def config_maker(project_name, path):
 def skeleton_path(parts):
     """Gets the path to a skeleton asset"""
     return os.path.join(os.path.dirname(oz.__file__), "skeleton", parts)
-
-@oz.action
-def explore(plugin_name):
-    """
-    Explores a given plugin, printing out its actions, UIModules, middleware,
-    routes, options and tests
-    """
-
-    oz.plugin(plugin_name)
-
-    for sub_module_name in plugin_name.split(".")[1:]:
-       module = getattr(module, sub_module_name)
-
-    print("Actions")
-    explore_dict(oz._actions)
-
-    print("\nUIModules")
-    explore_dict(oz._uimodules)
-
-    print("\nRoutes")
-    if oz._routes:
-        for route in oz._routes:
-            print("- %s" % route[0])
-            print("  - request handler: %s" % route[1])
-
-            if len(route) > 2:
-                print("  - request handler initialization args: %s" % route[2])
-    else:
-        print("  None")
-
-    print("\nOptions")
-    if oz._options:
-        for option_name, option_params in oz._options.items():
-            print("- %s" % option_name)
-
-            for option_param_name, option_param in option_params.items():
-                print("  - %s: %s" % (option_param_name, option_param))
-    else:
-        print("  None")
-
-    print("\nTests")
-    if oz._tests:
-        for test in oz._tests:
-            print("- %s" % test.__name__)
-    else:
-        print("  None")
 
 @oz.action
 def init(project_name):
