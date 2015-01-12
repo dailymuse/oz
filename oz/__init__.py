@@ -4,6 +4,8 @@ import types
 import collections
 import tornado.web
 import tornado.options
+import tornado.util
+import tornado.log
 import inspect
 import functools
 import collections
@@ -138,23 +140,31 @@ class RequestHandler(tornado.web.RequestHandler):
         if self.trigger("write_error", *args, **kwargs):
             super(RequestHandler, self).write_error(*args, **kwargs)
 
-def initialize():
-    # Parse the necessary environment variables
-    plugins_str = os.environ.get("OZ_PLUGINS", "oz.core")
-    plugins = plugins_str.split(",")
+def initialize(config=None):
+    if config == None:
+        config = {}
+        config_source = None
 
-    config_files_str = os.environ.get("OZ_CONFIG", "config.py")
-    config_files = config_files_str.split(",")
+        try:
+            with open(os.environ.get("OZ_CONFIG", "config.py")) as f:
+                config_source = f.read()
+        except Exception as e:
+            print("Could not read config.py:", e)
+            #tornado.log.gen_log.info("Could not read config.py", exc_info=True)
+
+        if config_source != None:
+            tornado.util.exec_in(config_source, config, config)
 
     # Load the plugins
-    for p in plugins:
+    for p in config.get("plugins", []):
         plugin(p)
 
-    # Parse the config files
-    for config_file in config_files:
-        tornado.options.parse_config_file(config_file)
+    # Set the options
+    for key, value in config.get("app_options", {}).items():
+        setattr(tornado.options.options, key, value)
 
     # Generate the application settings
     global settings
     settings = tornado.options.options.as_dict()
     settings["ui_modules"] = _uimodules
+    settings["project_name"] = config.get("project_name")

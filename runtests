@@ -1,22 +1,6 @@
 #!/bin/bash
 
-set -e
-
-function cleanup {
-    set +e
-    echo "Cleaning up..."
-
-    kill `jobs -p`
-    rm static/*
-    #rm -f test_project/oz_tests.db
-}
-
-trap cleanup EXIT
-
-export OZ_PLUGINS=oz.aws_cdn,oz.bandit,oz.blinks,oz.core,oz.json_api,oz.redis,oz.redis_sessions,oz.sqlalchemy,oz.error_pages
-export OZ_CONFIG=etc/config.py
-
-echo $OZ_CONFIG
-
-# Run the unit
-oz test
+OZ_CONFIG=etc/config.py oz test
+EXIT_CODE=$?
+rm static/* 2> /dev/null
+exit $EXIT_CODE
