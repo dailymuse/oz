@@ -1,56 +1,5 @@
 #!/bin/bash
 
-set -e
-
-function cleanup {
-    set +e
-    echo "Cleaning up..."
-
-    kill `jobs -p`
-    popd
-
-    rm -f test_project/oz_tests.db
-    rm -f test_project/static/real
-    rm -f test_project/static/real2
-}
-
-pushd test_project
-trap cleanup EXIT
-
-# Setup the database
-PYTHONPATH=..:$PYTHONPATH oz setup_database
-
-# Run the unit
-PYTHONPATH=..:$PYTHONPATH oz test
-
-# Run the server
-PYTHONPATH=..:$PYTHONPATH oz server &
-PING_RETURN_CODE=1
-
-# Wait for the server to finish starting
-set +e
-
-while [ $PING_RETURN_CODE -ne 0 ]; do
-    echo "Waiting for the server to start..."
-    sleep 1
-    curl http://localhost:8000/blink
-    PING_RETURN_CODE=$?
-done
-
-set -e
-
-# Run the integration tests
-PYTHON_MAJOR_VERSION=`python -c "import sys; sys.stdout.write(str(sys.version_info[0]))"`
-
-PYTHONPATH=..:$PYTHONPATH catnap catnap/bandit.yml --verbose --cookies
-PYTHONPATH=..:$PYTHONPATH catnap catnap/blinks.yml --verbose --cookies
-PYTHONPATH=..:$PYTHONPATH catnap catnap/json_api.yml --verbose
-PYTHONPATH=..:$PYTHONPATH catnap catnap/redis_sessions.yml --verbose --cookies
-PYTHONPATH=..:$PYTHONPATH catnap catnap/sqlalchemy.yml --verbose
-PYTHONPATH=..:$PYTHONPATH catnap catnap/error_pages.yml --verbose
-
-if [[ $PYTHON_MAJOR_VERSION -eq "3" ]]; then
-    echo "Skipping AWS CDN tests because it is not supported on python 3.x"
-else
-    PYTHONPATH=..:$PYTHONPATH catnap catnap/aws_cdn.yml --verbose
-fi
+OZ_CONFIG=etc/config.py oz test
+EXIT_CODE=$?
+exit $EXIT_CODE
