@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
 
+import os
 import oz
 import oz.testing
 import collections
@@ -44,13 +45,6 @@ class CDNMiddlewareTestCase(oz.testing.OzTestCase):
                 replace = self.get_argument("replace") == "true"
                 self.upload_file(path, escape.utf8(self.request.body), replace=replace)
 
-            def delete(self, path):
-                # Deletes a file
-                try:
-                    self.remove_file(path)
-                except:
-                    raise web.HTTPError(404)
-
         class CopyFileHandler(CDNHandler):
             def put(self, from_path, to_path):
                 # Copies a file from one path to another
@@ -71,6 +65,11 @@ class CDNMiddlewareTestCase(oz.testing.OzTestCase):
         redis = oz.redis.create_connection()
         redis.delete("cache-buster:v1")
 
+        # Kill any test files
+        for f in os.listdir("static"):
+            if f.startswith("test-aws-cdn-"):
+                os.remove(os.path.join("static", f))
+
     def test_get_cache_buster(self):
         # Set a cache buster
         response = self.request("/cache-buster/get-cache-buster-example?value=abcdef", method="PUT", body="")
@@ -90,20 +89,17 @@ class CDNMiddlewareTestCase(oz.testing.OzTestCase):
 
     def set_file(self, name, contents, replace=False):
         replace_str = "true" if replace else False
-        response = self.request("/file/%s?replace=%s" % (name, replace_str), method="PUT", body=contents)
-        if response.code != 200:
-            print("XXX", response.body)
-
+        response = self.request("/file/test-aws-cdn-%s?replace=%s" % (name, replace_str), method="PUT", body=contents)
         self.assertEqual(response.code, 200)
 
     def get_file(self, name):
-        response = self.request("/file/%s" % name)
+        response = self.request("/file/test-aws-cdn-%s" % name)
         self.assertEqual(response.code, 200)
         return response.body
 
     def copy_file(self, from_path, to_path, replace=False):
         replace_str = "true" if replace else False
-        response = self.request("/copy-file/%s/%s?replace=%s" % (from_path, to_path, replace_str), method="PUT", body="")
+        response = self.request("/copy-file/test-aws-cdn-%s/test-aws-cdn-%s?replace=%s" % (from_path, to_path, replace_str), method="PUT", body="")
         self.assertEqual(response.code, 200)
 
     def test_get_file(self):

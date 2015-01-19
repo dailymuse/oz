@@ -2,5 +2,4 @@
 
 OZ_CONFIG=etc/config.py oz test
 EXIT_CODE=$?
-rm static/* 2> /dev/null
 exit $EXIT_CODE
