@@ -56,29 +56,15 @@ app functionality. You can mix and match plugins in any way - an application's
 config.py specifies a list of plugins to load. At application load time, these
 plugins are loaded in-order.
 
-Out of the box, Oz includes several plugins to ease app development. You can
-explore the functionality of these (or any) plugins through the oz script:
-
-    oz explore <plugin package>
-
-This will print out all the actions, UIModules, routes, options and tests
-exposed by the plugin. It won't print middleware - it's hard to detect what is
-and is not middleware since they typically inherit from `object`.
-
 ## Actions ##
 
 When you run oz, the first argument specifies what action - or callback - to
 run. These actions will have access to the full application context.
 
-Oz has two built-in actions that are always available:
-
-* `init` - starts a new project
-* `explore` - explores a plugin
-
-There is furthermore a core plugin (`oz.core`) that is added by
-default to any new project (although can be replaced.) It provides three new
+Oz's core plugin (loaded by default, but it can be replaced) provides a few
 actions:
 
+* `init` - starts a new project
 * `server` - starts the oz server
 * `repl` - starts an IPython REPL instance, with the application context
   available
