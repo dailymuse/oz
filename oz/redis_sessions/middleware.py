@@ -1,9 +1,13 @@
+"""Middleware for the redis sessions plugin"""
+
 from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
 
 import oz
 import oz.redis_sessions
 
 class RedisSessionMiddleware(object):
+    """Adds redis-backed session capabilities"""
+
     def _session_key(self):
         """Gets the redis key for a session"""
 

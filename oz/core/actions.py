@@ -1,3 +1,5 @@
+"""Actions for the core plugin"""
+
 from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
 
 import tornado.web
@@ -13,7 +15,7 @@ import os
 import functools
 import re
 
-VALID_PROJECT_NAME = re.compile("^\w+$")
+VALID_PROJECT_NAME = re.compile(r"^\w+$")
 
 def check_path(path, otherwise):
     """
@@ -60,8 +62,8 @@ def server():
 
     if oz.settings["wsgi_mode"]:
         application = tornado.wsgi.WSGIApplication(oz._routes, **oz.settings)
-        server = wsgiref.simple_server.make_server("", oz.settings["port"], application)
-        server.serve_forever()
+        srv = wsgiref.simple_server.make_server("", oz.settings["port"], application)
+        srv.serve_forever()
     else:
         application = tornado.web.Application(oz._routes, **oz.settings)
 
@@ -75,17 +77,17 @@ def server():
         else:
             ssl_options = None
 
-        server = tornado.httpserver.HTTPServer(application, ssl_options=ssl_options)
-        server.bind(oz.settings["port"])
+        srv = tornado.httpserver.HTTPServer(application, ssl_options=ssl_options)
+        srv.bind(oz.settings["port"])
 
         if oz.settings["debug"]:
             if oz.settings["server_workers"] != 1:
                 print("WARNING: Debug is enabled, but multiple server workers have been configured. Only one server worker can run in debug mode.")
 
-            server.start(1)
+            srv.start(1)
         else:
             # Forks multiple sub-processes
-            server.start(oz.settings["server_workers"])
+            srv.start(oz.settings["server_workers"])
         
         tornado.ioloop.IOLoop.instance().start()
 
@@ -113,10 +115,10 @@ def test(*filters):
     suite = unittest.TestSuite()
     filters_set = set(filters)
 
-    for test in oz._tests:
-        if not filters_set or test.__name__ in filters_set:
+    for t in oz._tests:
+        if not filters_set or t.__name__ in filters_set:
             # Add the class to the suite
-            child_suite = unittest.makeSuite(test, "test")
+            child_suite = unittest.makeSuite(t, "test")
             suite.addTest(child_suite)
 
     res = unittest.TextTestRunner().run(suite)

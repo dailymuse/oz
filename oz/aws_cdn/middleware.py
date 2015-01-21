@@ -1,11 +1,13 @@
+"""Middleware for aws_cdn plugin"""
+
 from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
 
 import oz
-import sys
-import warnings
 import oz.aws_cdn
 
 class CDNMiddleware(object):
+    """Middleware functions for AWS-based static asset management"""
+
     def __init__(self):
         super(CDNMiddleware, self).__init__()
         self.template_helper("cdn_static_url", self.cdn_static_url)

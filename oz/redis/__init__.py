@@ -1,3 +1,5 @@
+"""The redis plugin"""
+
 from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
 
 import redis
@@ -7,7 +9,7 @@ from .options import *
 
 _cached_connection = None
 
-def create_connection(**kwargs):
+def create_connection():
     """Sets up a redis configuration"""
 
     global _cached_connection

@@ -1,3 +1,5 @@
+"""Actions for aws_cdn plugin"""
+
 from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
 
 # Module for generating hashes for files that match a glob, and putting that

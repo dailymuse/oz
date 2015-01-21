@@ -1,9 +1,12 @@
+"""Middleware for the blinks plugin"""
+
 from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
 
-import oz
 from tornado import escape
 
 class BlinkMiddleware(object):
+    """Adds flask-like blink functionality"""
+
     def __init__(self):
         super(BlinkMiddleware, self).__init__()
         self.template_helper("get_blink", self.get_blink)

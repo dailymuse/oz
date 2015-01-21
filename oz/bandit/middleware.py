@@ -1,3 +1,5 @@
+"""Middleware for the bandit plugin"""
+
 from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
 
 import oz
@@ -63,7 +65,7 @@ class BanditTestingMiddleware(object):
         # Add to the play count for the selected choice
         if choice:
             experiment.add_play(choice)
-        
+
         return choice
 
     def experiment_success(self, name):
@@ -77,16 +79,3 @@ class BanditTestingMiddleware(object):
 
         if choice:
             experiment.add_reward(choice)
-
-    def choose_experiment_callback(self, name, *args, **kwargs):
-        """
-        Helper method that takes in a dict of choice names to callbacks. A
-        choice is selected for the user, and the associated callback is
-        executed with the specified `args` and `kwargs`. If the callback
-        returns `True`, the choice is marked successful.
-        """
-
-        choice = self.choose_experiment(name)
-        result = choices[choice](*args, **kwargs)
-        if result == True: self.experiment_success(name)
-        return choice

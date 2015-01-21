@@ -1,3 +1,8 @@
+"""
+Plugin for providing static asset management with AWS' S3 (with or without a
+CDN that works with S3, such as CloudFront.)
+"""
+
 from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
 
 try:
@@ -44,6 +49,7 @@ def get_bucket(s3_bucket=None, validate=False):
         raise Exception("S3 not supported in this environment as boto is not installed")
 
 def get_file(path):
+    """Gets a file"""
     if oz.settings["s3_bucket"]:
         bucket = get_bucket(oz.settings["s3_bucket"])
         return S3File(bucket.new_key(path))
@@ -51,6 +57,8 @@ def get_file(path):
         return LocalFile(oz.settings["static_path"], path)
 
 class CDNFile(object):
+    """File spec for a CDN/S3-hosted file"""
+
     def __hash__(self):
         return hash("%s:%s" % (self.__class__.__name__, self.path()))
 
@@ -66,7 +74,7 @@ class CDNFile(object):
 
     def path(self):
         """Gets the path of the file"""
-        raise NotImplementError()
+        raise NotImplementedError()
 
     def upload(self, contents, replace=False):
         """
@@ -74,19 +82,19 @@ class CDNFile(object):
         appropriate parent directories when needed. If the path already exists
         and `replace` is `False`, the file will not be uploaded.
         """
-        raise NotImplementError()
+        raise NotImplementedError()
 
     def contents(self):
         """Gets the contents of the file"""
-        raise NotImplementError()
+        raise NotImplementedError()
 
     def exists(self):
         """Returns whether the path exists"""
-        raise NotImplementError()
+        raise NotImplementedError()
 
     def remove(self):
         """Removes the given file"""
-        raise NotImplementError()
+        raise NotImplementedError()
 
 class LocalFile(CDNFile):
     """

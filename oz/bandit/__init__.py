@@ -1,3 +1,5 @@
+"""Bandit testing plugin"""
+
 from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
 
 from tornado import escape, util
@@ -38,6 +40,8 @@ class ExperimentException(Exception):
         self.experiment_name = experiment_name
 
 class Experiment(object):
+    """Specification for a bandit experiment"""
+
     def __init__(self, redis, name):
         if not ALLOWED_NAMES.match(name):
             raise ExperimentException(name, "Illegal name")
@@ -46,6 +50,7 @@ class Experiment(object):
         self.name = name
 
     def _redis_key(self):
+        """Gets the redis key for this experiment"""
         return EXPERIMENT_REDIS_KEY_TEMPLATE % self.name
 
     def exists(self):

@@ -1,10 +1,11 @@
+"""Tools for running unit tests"""
+
 from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
 
 import tornado.web
 import tornado.testing
 import oz
 import collections
-import operator
 
 # Pseudo-cookie storage
 cookie_counter = 0
@@ -35,16 +36,15 @@ class OzTestCase(tornado.testing.AsyncHTTPTestCase):
         oz.settings = self.old_settings
 
     def get_app(self):
-        self.app = tornado.web.Application(self.get_handlers(), **self.get_app_kwargs())
+        self.app = tornado.web.Application(self.get_handlers(), **oz.settings)
         return self.app
 
     def get_handlers(self):
+        """Specifies what routes to expose for this test"""
         raise NotImplementedError()
 
-    def get_app_kwargs(self):
-        return oz.settings
-
     def request(self, path, **kwargs):
+        """Makes a request to one of the routes exposed by this test"""
         self.http_client.fetch(self.get_url(path), self.stop, **kwargs)
         return self.wait()
 

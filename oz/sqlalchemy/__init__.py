@@ -1,3 +1,5 @@
+"""The sqlalchemy plugin"""
+
 from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
 
 from sqlalchemy import create_engine
@@ -16,6 +18,11 @@ _engine = None
 _session = None
 
 class _AfterFork(object):
+    """
+    Ensures cleanup of sqlalchemy connections after a fork is done. This guard
+    is here because sqlalchemy connections cannot be shared across processes.
+    """
+
     registered = False
 
     def __call__(self):

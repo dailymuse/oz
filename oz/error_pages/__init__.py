@@ -1,3 +1,5 @@
+"""The error pages plugin"""
+
 from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
 
 from .middleware import *
@@ -11,6 +13,7 @@ import pprint
 import linecache
 
 class DebugBreakException(Exception):
+    """Raise this to break into the debugger during an HTTP request"""
     pass
 
 def debug():
@@ -18,6 +21,8 @@ def debug():
     raise DebugBreakException()
 
 class ErrorFrame(object):
+    """Holds information about a function call in a traceback"""
+
     def __init__(self, tback, filename, function, lineno, vars, id, pre_context, context_line, post_context, pre_context_lineno):
         self.tback = tback
         self.filename = filename
@@ -45,14 +50,16 @@ def get_lines_from_file(filename, lineno, context_lines):
     context_line = linecache.getline(filename, lineno).rstrip()
     post_context = get_lines(lineno + 1, upper_bound)
     return lower_bound, pre_context, context_line, post_context
-        
+
 def get_frames(tback, is_breakpoint):
+    """Builds a list of ErrorFrame objects from a traceback"""
+
     frames = []
-    
+
     while tback is not None:
         if tback.tb_next == None and is_breakpoint:
             break
-        
+
         filename = tback.tb_frame.f_code.co_filename
         function = tback.tb_frame.f_code.co_name
         context = tback.tb_frame.f_locals
@@ -61,13 +68,15 @@ def get_frames(tback, is_breakpoint):
         pre_context_lineno, pre_context, context_line, post_context = get_lines_from_file(filename, lineno + 1, 7)
         frames.append(ErrorFrame(tback, filename, function, lineno, context, tback_id, pre_context, context_line, post_context, pre_context_lineno))
         tback = tback.tb_next
-    
+
     return frames
 
 def prettify_object(obj):
+    """Makes a pretty string for an object for nice output"""
+
     try:
         return pprint.pformat(str(obj))
     except UnicodeDecodeError as e:
         raise
-    except Exception as e: 
+    except Exception as e:
         return "[could not display: <%s: %s>]" % (e.__class__.__name__, str(e))

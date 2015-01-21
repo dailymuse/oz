@@ -1,3 +1,5 @@
+"""Oz"""
+
 from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
 
 import types
@@ -8,7 +10,6 @@ import tornado.util
 import tornado.log
 import inspect
 import functools
-import collections
 import os
 
 # On trigger execution, trigger listeners can return this to notify the
@@ -31,14 +32,14 @@ _tests = []
 # Mapping of setting name -> value
 settings = {}
 
-def _add_to_dict(type, container, name, value):
+def _add_to_dict(t, container, name, value):
     """
     Adds an item to a dictionary, or raises an exception if an item with the
     specified key already exists in the dictionary.
     """
 
     if name in container:
-        raise Exception("%s '%s' already exists" % (type, name))
+        raise Exception("%s '%s' already exists" % (t, name))
     else:
         container[name] = value
 
@@ -79,6 +80,11 @@ def plugin(namespace):
     __import__(namespace, globals(), locals(), [], 0)
 
 class RequestHandler(tornado.web.RequestHandler):
+    """
+    Builds on top of tornado's RequestHandler to provide template helpers and
+    triggers
+    """
+
     def __init__(self, *args, **kwargs):
         self._template_helpers = {}
         self._triggers = collections.defaultdict(lambda: [])
@@ -141,6 +147,9 @@ class RequestHandler(tornado.web.RequestHandler):
             super(RequestHandler, self).write_error(*args, **kwargs)
 
 def initialize(config=None):
+    """Initializes oz"""
+
+    # Load the config file
     if config == None:
         config = {}
         config_source = None
@@ -148,7 +157,7 @@ def initialize(config=None):
         try:
             with open(os.environ.get("OZ_CONFIG", "config.py")) as f:
                 config_source = f.read()
-        except Exception as e:
+        except Exception:
             tornado.log.gen_log.info("Could not read config.py", exc_info=True)
 
         if config_source != None:

@@ -1,3 +1,5 @@
+"""Errors for the JSON API plugin"""
+
 import tornado.web
 
 class ApiError(tornado.web.HTTPError):

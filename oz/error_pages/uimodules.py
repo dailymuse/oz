@@ -1,3 +1,5 @@
+"""UIModules for the error pages plugin"""
+
 import oz
 import base64
 import pprint
@@ -28,9 +30,7 @@ TABLE_ROW_FORMAT = """
 
 @oz.uimodule
 class DictTable(tornado.web.UIModule):
-    """
-    Renders an HTML table from a dict
-    """
+    """Renders an HTML table from a dict"""
 
     def render(self, d, id=None, kls=None):
         items = sorted(d.items())

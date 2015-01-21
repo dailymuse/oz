@@ -1,3 +1,5 @@
+"""Middleware for the JSON API plugin"""
+
 from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
 
 import oz
@@ -6,10 +8,19 @@ import oz.json_api
 from tornado import escape
 import traceback
 
+# Mapping of HTTP error codes to API error messages
 API_ERROR_CODE_MAP = { 404: "Not found", 500: "Server error" }
+
+# Checks for valid JSONP callbacks. This does not work for all legal
+# javascript function names, nor is it intended to.
 CALLBACK_VALIDATOR = re.compile('^[$A-Za-z_][0-9A-Za-z_$]*$')
 
 class ApiMiddleware(object):
+    """
+    Middleware that provides utilities and methods for JSON API-based
+    RequestHandlers
+    """
+
     def __init__(self):
         super(ApiMiddleware, self).__init__()
         self._decoded_body = None
