@@ -57,8 +57,8 @@ def sync_from_spec(redis, schema):
         return dict((experiment.name, experiment) for experiment in get_experiments(redis, active=active))
 
     # Get the current experiments
-    active_experiments = get_experiments_dict(redis)
-    archived_experiments = get_experiments_dict(redis, active=False)
+    active_experiments = get_experiments_dict()
+    archived_experiments = get_experiments_dict(active=False)
 
     # Get the newly defined experiment names and the names of the experiments
     # already setup
@@ -84,7 +84,7 @@ def sync_from_spec(redis, schema):
 
     # Reload the active experiments if we de-archived any
     if unarchivable_experiment_names:
-        active_experiments = get_experiments_dict(redis)
+        active_experiments = get_experiments_dict()
         active_experiment_names = set(active_experiments.keys())
 
     # Create the new experiments
