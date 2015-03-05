@@ -11,8 +11,10 @@ class ConfidenceTestCase(unittest.TestCase):
     """
 
     def test_is_confident(self):
-        self.assertFalse(oz.bandit.is_confident(9.48, 2))
-        self.assertTrue(oz.bandit.is_confident(9.49, 2))
+        self.assertFalse(oz.bandit.is_confident(3.83, 2))
+        self.assertTrue(oz.bandit.is_confident(3.84, 2))
+        self.assertFalse(oz.bandit.is_confident(5.98, 3))
+        self.assertTrue(oz.bandit.is_confident(5.99, 3))
 
     def test_chi_squared(self):
         # Convenience method for creating a faux choice

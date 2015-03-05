@@ -56,7 +56,7 @@ def is_confident(csq, num_choices):
     Returns whether an experiment is statistically significant with 95%%
     confidence
     """
-    return csq >= CHI_SQUARE_DISTRIBUTION[num_choices * 2 - 1]
+    return csq >= CHI_SQUARE_DISTRIBUTION[num_choices - 2]
 
 def parse_json(raw):
     """Parses raw bytes to a JSON object with unicode strings"""
