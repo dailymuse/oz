@@ -5,15 +5,27 @@ import oz.redis
 import unittest
 
 @oz.test
-class ChiSquaredTestCase(unittest.TestCase):
-    def test_get_chi_squared(self):
+class ConfidenceTestCase(unittest.TestCase):
+    """
+    Tests chi squared and confidence calculations
+    """
+
+    def test_is_confident(self):
+        self.assertFalse(oz.bandit.is_confident(3.83, 2))
+        self.assertTrue(oz.bandit.is_confident(3.84, 2))
+        self.assertFalse(oz.bandit.is_confident(5.98, 3))
+        self.assertTrue(oz.bandit.is_confident(5.99, 3))
+
+    def test_chi_squared(self):
+        # Convenience method for creating a faux choice
+        c = lambda plays, rewards: dict(plays=plays, rewards=rewards)
 
         # Make sure it returns 0 for an experiment with no results
-        csq = oz.bandit.get_chi_squared(0, 0, 0, 0)
+        csq = oz.bandit.chi_squared(c(0, 0), c(0, 0))
         self.assertEqual(csq, 0)
 
-        csq = oz.bandit.get_chi_squared(17, 3, 19, 2)
-        self.assertEqual(round(csq, 3), 0.328)
+        csq = oz.bandit.chi_squared(c(17, 3), c(19, 2))
+        self.assertEqual(round(csq, 3), 0.380)
 
 @oz.test
 class BanditCoreTestCase(unittest.TestCase):
@@ -129,7 +141,8 @@ class BanditCoreTestCase(unittest.TestCase):
         self.assertEqual(data["name"], "ex-data")
         self.assertNotEqual(data["metadata"], None)
         self.assertEqual(data["default"], "arm1")
-        self.assertEqual(round(data["chi_squared"], 3), 0.328)
+        self.assertEqual(round(data["chi_squared"], 3), 0.380)
+        self.assertFalse(data["confident"])
 
         self.assertEqual(len(data["choices"]), 2)
 
