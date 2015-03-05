@@ -13,17 +13,50 @@ ARCHIVED_EXPERIMENTS_REDIS_KEY = "bandit:listing:archived:v2"
 EXPERIMENT_REDIS_KEY_TEMPLATE = "bandit:experiment:%s:v2"
 ALLOWED_NAMES = re.compile("^[A-Za-z0-9-_]+$")
 
-def get_chi_squared(choice1_plays, choice1_rewards, choice2_plays, choice2_rewards):
-    """Calculates chi-squared between two choices"""
+# Via http://passel.unl.edu/Image/Namuth-CovertDeana956176274/chi-sqaure%20distribution%20table.PNG
+# Ideally this would be computed on-the-fly. If you know your differential
+# equations, PR please!
+CHI_SQUARE_DISTRIBUTION = [
+    3.84,
+    5.99,
+    7.81,
+    9.49,
+    11.07,
+    12.59,
+    14.07,
+    15.51,
+    16.92,
+    18.31,
+    19.68,
+    21.03,
+    22.36,
+    23.68,
+    25.00,
+    26.30,
+    27.59,
+    28.87,
+    30.14,
+    31.41,
+]
 
-    # Currently not set up to calculate chi_squared for more than 2 arms
-    exp_0 = (float(choice1_rewards) + choice2_rewards) / ((choice1_plays + choice2_plays) or 1) * choice1_plays
-    exp_1 = (float(choice1_rewards) + choice2_rewards) / ((choice1_plays + choice2_plays) or 1) * choice2_plays
+def chi_squared(*choices):
+    """Calculates the chi squared"""
 
-    if exp_0 > 0 and exp_1 > 0:
-        return (exp_0 - float(choice1_rewards)) ** 2 / exp_0 + (exp_1 - float(choice2_rewards)) ** 2 / exp_1
-    else:
-        return 0
+    term = lambda expected, observed: float((expected - observed) ** 2) / max(expected, 1)
+    mean_success_rate = float(sum([c["rewards"] for c in choices])) / max(sum([c["plays"] for c in choices]), 1)
+    mean_failure_rate = 1 - mean_success_rate
+
+    return sum([
+        term(mean_success_rate * c["plays"], c["rewards"])
+        + term(mean_failure_rate * c["plays"], c["plays"] - c["rewards"]
+    ) for c in choices])
+
+def is_confident(csq, num_choices):
+    """
+    Returns whether an experiment is statistically significant with 95%%
+    confidence
+    """
+    return csq >= CHI_SQUARE_DISTRIBUTION[num_choices * 2 - 1]
 
 def parse_json(raw):
     """Parses raw bytes to a JSON object with unicode strings"""
@@ -161,16 +194,19 @@ class Experiment(object):
 
         # Get the chi-squared between the top two choices, if more than two choices exist
         if len(choices) >= 2:
-            chi_squared = get_chi_squared(choices[0]["plays"], choices[0]["rewards"], choices[1]["plays"], choices[1]["rewards"])
+            csq = chi_squared(*choices)
+            confident = is_confident(csq, len(choices)) if len(choices) <= 10 else None
         else:
-            chi_squared = None
+            csq = None
+            confident = False
         
         # Return the results
         return {
             "name": self.name,
             "metadata": self.metadata(),
             "default": self.get_default_choice(),
-            "chi_squared": chi_squared,
+            "chi_squared": csq,
+            "confident": confident,
             "choices": choices
         }
 
