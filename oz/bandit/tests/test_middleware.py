@@ -26,8 +26,7 @@ class BanditMiddlewareTestCase(oz.testing.OzTestCase):
 
             def post(self, name):
                 # Sets a choice for a given experiment using the bandit algorithm
-                exp = oz.bandit.Experiment(self.redis(), name)
-                exp.add()
+                exp = oz.bandit.add_experiment(self.redis(), name)
                 exp.add_choice("A")
                 exp.add_choice("B")
                 exp.add_choice("C")

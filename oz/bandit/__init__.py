@@ -43,12 +43,12 @@ def chi_squared(*choices):
     """Calculates the chi squared"""
 
     term = lambda expected, observed: float((expected - observed) ** 2) / max(expected, 1)
-    mean_success_rate = float(sum([c["rewards"] for c in choices])) / max(sum([c["plays"] for c in choices]), 1)
+    mean_success_rate = float(sum([c.rewards for c in choices])) / max(sum([c.plays for c in choices]), 1)
     mean_failure_rate = 1 - mean_success_rate
 
     return sum([
-        term(mean_success_rate * c["plays"], c["rewards"])
-        + term(mean_failure_rate * c["plays"], c["plays"] - c["rewards"]
+        term(mean_success_rate * c.plays, c.rewards)
+        + term(mean_failure_rate * c.plays, c.plays - c.rewards
     ) for c in choices])
 
 def is_confident(csq, num_choices):
@@ -124,8 +124,7 @@ def sync_from_spec(redis, schema):
     for new_experiment_name in new_experiment_names - active_experiment_names:
         print("- Creating experiment %s" % new_experiment_name)
 
-        experiment = Experiment(redis, new_experiment_name)
-        experiment.add()
+        experiment = add_experiment(redis, new_experiment_name)
 
         for choice in schema[new_experiment_name]:
             print("  - Adding choice %s" % choice)
@@ -141,7 +140,7 @@ def sync_from_spec(redis, schema):
     for experiment_name in new_experiment_names & active_experiment_names:
         experiment = active_experiments[experiment_name]
         new_choice_names = set(schema[experiment_name])
-        old_choice_names = set(experiment.choices())
+        old_choice_names = set(experiment.choice_names)
 
         # Add choices in the schema that do not exist yet
         for new_choice_name in new_choice_names - old_choice_names:
@@ -167,121 +166,32 @@ class Experiment(object):
     """Specification for a bandit experiment"""
 
     def __init__(self, redis, name):
-        if not ALLOWED_NAMES.match(name):
-            raise ExperimentException(name, "Illegal name")
-
         self.redis = redis
         self.name = name
+        self.refresh()
 
-    def _redis_key(self):
-        """Gets the redis key for this experiment"""
-        return EXPERIMENT_REDIS_KEY_TEMPLATE % self.name
+    def refresh(self):
+        payload = self.redis.hgetall(EXPERIMENT_REDIS_KEY_TEMPLATE % self.name)
 
-    def exists(self):
-        """Checks whether this experiment exists"""
-        return self.redis.exists(self._redis_key())
-
-    def add(self):
-        """Adds the new experiment"""
-
-        # Check to ensure the experiment doesn't already exists
-        if self.exists():
-            raise ExperimentException(self.name, "already exists")
-
-        # Add the experiment
-        json = dict(creation_date=util.unicode_type(datetime.datetime.now()))
-        pipe = self.redis.pipeline(transaction=True)
-        pipe.sadd(ACTIVE_EXPERIMENTS_REDIS_KEY, self.name)
-        pipe.hset(self._redis_key(), "metadata", escape.json_encode(json))
-        pipe.execute()
-
-    def archive(self):
-        """Archives an experiment"""
-
-        if not self.exists():
-            raise ExperimentException(self.name, "does not exist") 
-
-        pipe = self.redis.pipeline(transaction=True)
-        pipe.srem(ACTIVE_EXPERIMENTS_REDIS_KEY, self.name)
-        pipe.sadd(ARCHIVED_EXPERIMENTS_REDIS_KEY, self.name)
-        pipe.execute()
-
-    def metadata(self):
-        """Gets the properties associated with this experiment"""
-        return parse_json(self.redis.hget(self._redis_key(), "metadata"))
-
-    def choices(self):
-        """Gets the choices available"""
-        return parse_json(self.redis.hget(self._redis_key(), "choices")) or []
-
-    def add_choice(self, choice):
-        """Adds a choice for the experiment"""
-
-        if not ALLOWED_NAMES.match(choice):
-            raise ExperimentException(self.name, "Illegal choice name: %s" % choice)
-
-        choices = self.choices()
-        choices.append(choice)
-        self.redis.hset(self._redis_key(), "choices", escape.json_encode(choices))
-
-    def remove_choice(self, choice):
-        """Adds a choice for the experiment"""
-
-        if not ALLOWED_NAMES.match(choice):
-            raise ExperimentException(self.name, "Illegal choice name: %s" % choice)
-
-        choices = self.choices()
-        choices.remove(choice)
-        self.redis.hset(self._redis_key(), "choices", escape.json_encode(choices))
-
-    def plays(self, choice):
-        """Gets the play count associated with an experiment choice"""
-        return int(self.redis.hget(self._redis_key(), "%s:plays" % choice) or 0)
-
-    def add_play(self, choice, count=1):
-        """Increments the play count for a given experiment choice"""
-        self.redis.hincrby(self._redis_key(), "%s:plays" % choice, count)
-
-    def rewards(self, choice):
-        """Gets the reward count associated with an experiment choice"""
-        return int(self.redis.hget(self._redis_key(), "%s:rewards" % choice) or 0)
-
-    def add_reward(self, choice, count=1):
-        """Increments the reward count for a given experiment choice"""
-        self.redis.hincrby(self._redis_key(), "%s:rewards" % choice, count)
-
-    def get_default_choice(self):
-        """Gets the default choice for this experiment"""
-        return escape.to_unicode(self.redis.hget(self._redis_key(), "default-choice"))
-
-    def set_default_choice(self, choice):
-        """Sets the default choice for this experiment"""
-        self.redis.hset(self._redis_key(), "default-choice", choice)
-
-    def results(self):
-        """
-        Gets all of the data associated with this experiment, and stores it in
-        a JSON-serializable data structure
-        """
-
-        if not self.exists():
+        if not payload:
             raise ExperimentException(self.name, "does not exist")
 
-        # Build a list of all the choices
-        choices = []
+        self.metadata = parse_json(payload["metadata"])
+        self.choice_names = parse_json(payload.get("choices")) or []
+        self.default_choice = escape.to_unicode(payload.get("default-choice"))
+        self._choices = None
 
-        for choice in self.choices():
-            plays = self.plays(choice)
-            rewards = self.rewards(choice)
-            results = rewards / (plays or 1)
-            choices.append(dict(name=choice, plays=plays, rewards=rewards, results=results))
+    @property
+    def choices(self):
+        """Gets the experiment choices"""
 
-        # Find the top two choices
-        choices.sort(key=lambda c: c["results"], reverse=True)
+        if self._choices == None:
+            self._choices = [ExperimentChoice(self, choice_name) for choice_name in self.choice_names]
 
-        # Set the default choice for this experiment
-        if len(choices) >= 1:
-            self.set_default_choice(choices[0]["name"])
+        return self._choices
+
+    def confidence(self):
+        choices = self.choices
 
         # Get the chi-squared between the top two choices, if more than two choices exist
         if len(choices) >= 2:
@@ -290,16 +200,85 @@ class Experiment(object):
         else:
             csq = None
             confident = False
-        
-        # Return the results
-        return {
-            "name": self.name,
-            "metadata": self.metadata(),
-            "default": self.get_default_choice(),
-            "chi_squared": csq,
-            "confident": confident,
-            "choices": choices
-        }
+
+        return (csq, confident)
+
+    def archive(self):
+        """Archives an experiment"""
+        pipe = self.redis.pipeline(transaction=True)
+        pipe.srem(ACTIVE_EXPERIMENTS_REDIS_KEY, self.name)
+        pipe.sadd(ARCHIVED_EXPERIMENTS_REDIS_KEY, self.name)
+        pipe.execute()
+
+    def add_choice(self, choice_name):
+        """Adds a choice for the experiment"""
+
+        if not ALLOWED_NAMES.match(choice_name):
+            raise ExperimentException(self.name, "Illegal choice name: %s" % choice_name)
+
+        if choice_name in self.choice_names:
+            raise ExperimentException(self.name, "Choice already exists: %s" % choice_name)
+
+        self.choice_names.append(choice_name)
+        self.redis.hset(EXPERIMENT_REDIS_KEY_TEMPLATE % self.name, "choices", escape.json_encode(self.choice_names))
+        self.refresh()
+
+    def remove_choice(self, choice_name):
+        """Adds a choice for the experiment"""
+
+        self.choice_names.remove(choice_name)
+        self.redis.hset(EXPERIMENT_REDIS_KEY_TEMPLATE % self.name, "choices", escape.json_encode(self.choice_names))
+        self.refresh()
+
+    def compute_default_choice(self):
+        """Computes and sets the default choice"""
+
+        choices = self.choices
+
+        if len(choices) == 0:
+            return None
+
+        high_choice = max(choices, key=lambda choice: choice.performance)
+        self.redis.hset(EXPERIMENT_REDIS_KEY_TEMPLATE % self.name, "default-choice", high_choice.name)
+        self.refresh()
+        return high_choice
+
+class ExperimentChoice(object):
+    def __init__(self, experiment, name):
+        self.experiment = experiment
+        self.name = name
+        self.refresh()
+
+    def refresh(self):
+        redis_key = EXPERIMENT_REDIS_KEY_TEMPLATE % self.experiment.name
+        self.plays = int(self.experiment.redis.hget(redis_key, "%s:plays" % self.name) or 0)
+        self.rewards = int(self.experiment.redis.hget(redis_key, "%s:rewards" % self.name) or 0)
+        self.performance = float(self.rewards) / max(self.plays, 1)
+
+    def add_play(self, count=1):
+        """Increments the play count for a given experiment choice"""
+        self.experiment.redis.hincrby(EXPERIMENT_REDIS_KEY_TEMPLATE % self.experiment.name, "%s:plays" % self.name, count)
+        self.refresh()
+
+    def add_reward(self, count=1):
+        """Increments the reward count for a given experiment choice"""
+        self.experiment.redis.hincrby(EXPERIMENT_REDIS_KEY_TEMPLATE % self.experiment.name, "%s:rewards" % self.name, count)
+        self.refresh()
+
+def add_experiment(redis, name):
+    """Adds a new experiment"""
+
+    if not ALLOWED_NAMES.match(name):
+        raise ExperimentException(name, "Illegal name")
+    if redis.exists(EXPERIMENT_REDIS_KEY_TEMPLATE % name):
+        raise ExperimentException(name, "Already exists")
+
+    json = dict(creation_date=util.unicode_type(datetime.datetime.now()))
+    pipe = redis.pipeline(transaction=True)
+    pipe.sadd(ACTIVE_EXPERIMENTS_REDIS_KEY, name)
+    pipe.hset(EXPERIMENT_REDIS_KEY_TEMPLATE % name, "metadata", escape.json_encode(json))
+    pipe.execute()
+    return Experiment(redis, name)
 
 def get_experiments(redis, active=True):
     """Gets the full list of experiments"""

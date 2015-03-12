@@ -37,26 +37,24 @@ class BanditTestingMiddleware(object):
         potentially the default choice anyway.)
         """
 
-        redis = self.redis()
-        experiment = oz.bandit.Experiment(redis, name)
-        experiment_choices = experiment.choices()
+        experiment = oz.bandit.Experiment(self.redis(), name)
         choice = self.get_experiment_choice(name)
 
         # If the currently selected user choice is no longer valid, nullify it
-        if not choice in experiment_choices:
+        if not choice in experiment.choice_names:
             choice = None
 
         if not choice:
             if random.random() >= 0.1:
                 # Join the best performing choice
-                default_choice = experiment.get_default_choice()
+                default_choice = experiment.default_choice
 
                 if default_choice:
                     choice = default_choice
 
-            if not choice and len(experiment_choices) > 0:
+            if not choice and len(experiment.choice_names) > 0:
                 # Join a random choice
-                choice = random.choice(experiment_choices)
+                choice = random.choice(experiment.choice_names)
 
             # Opt the user in
             if choice:
@@ -73,9 +71,9 @@ class BanditTestingMiddleware(object):
         Marks the user's current choice as successful - i.e. the user
         converted, or clicked-through, etc.
         """
-        redis = self.redis()
-        choice = self.get_experiment_choice(name)
-        experiment = oz.bandit.Experiment(redis, name)
+        successful_choice = self.get_experiment_choice(name)
+        experiment = oz.bandit.Experiment(self.redis(), name)
 
-        if choice:
-            experiment.add_reward(choice)
+        for choice in experiment.choices:
+            if choice == successful_choice:
+                choice.add_play()

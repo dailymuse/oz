@@ -10,7 +10,7 @@ from tornado import escape
 def add_experiment(experiment):
     """Adds a new experiment"""
     redis = oz.redis.create_connection()
-    oz.bandit.Experiment(redis, experiment).add()
+    oz.bandit.add_experiment(redis, experiment)
 
 @oz.action
 def archive_experiment(experiment):
@@ -40,16 +40,17 @@ def get_experiment_results():
     redis = oz.redis.create_connection()
 
     for experiment in oz.bandit.get_experiments(redis):
-        data = experiment.results()
+        csq, confident = experiment.confidence()
 
-        print("%s:" % data["name"])
-        print("- creation date: %s" % data["metadata"]["creation_date"])
-        print("- default choice: %s" % data["default"])
-        print("- chi squared: %s" % data["chi_squared"])
+        print("%s:" % experiment.name)
+        print("- creation date: %s" % experiment.metadata["creation_date"])
+        print("- default choice: %s" % experiment.default_choice)
+        print("- chi squared: %s" % csq)
+        print("- confident: %s" % confident)
         print("- choices:")
 
-        for choice_data in data["choices"]:
-            print("  - %s: plays=%s, rewards=%s, result=%s" % (choice_data["name"], choice_data["plays"], choice_data["rewards"], choice_data["results"]))
+        for choice in experiment.choices:
+            print("  - %s: plays=%s, rewards=%s, performance=%s" % (choice.name, choice.plays, choice.rewards, choice.performance))
 
 @oz.action
 def sync_experiments_from_spec(filename):
@@ -66,7 +67,7 @@ def sync_experiments_from_spec(filename):
 
     redis = oz.redis.create_connection()
 
-    with open("./scripts/experiments.json", "r") as f:
+    with open(filename, "r") as f:
         schema = escape.json_decode(f.read())
 
     oz.bandit.sync_from_spec(redis, schema)
