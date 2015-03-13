@@ -40,6 +40,7 @@ def get_experiment_results():
     redis = oz.redis.create_connection()
 
     for experiment in oz.bandit.get_experiments(redis):
+        experiment.compute_default_choice()
         csq, confident = experiment.confidence()
 
         print("%s:" % experiment.name)
