@@ -71,9 +71,6 @@ class BanditTestingMiddleware(object):
         Marks the user's current choice as successful - i.e. the user
         converted, or clicked-through, etc.
         """
-        successful_choice = self.get_experiment_choice(name)
+        choice = self.get_experiment_choice(name)
         experiment = oz.bandit.Experiment(self.redis(), name)
-
-        for choice in experiment.choices:
-            if choice == successful_choice:
-                choice.add_play()
+        experiment.add_play(choice)

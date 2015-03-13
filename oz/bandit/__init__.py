@@ -171,14 +171,18 @@ class Experiment(object):
         self.refresh()
 
     def refresh(self):
-        payload = self.redis.hgetall(EXPERIMENT_REDIS_KEY_TEMPLATE % self.name)
+        pipe = self.redis.pipeline()
+        pipe.hget(EXPERIMENT_REDIS_KEY_TEMPLATE % self.name, "metadata")
+        pipe.hget(EXPERIMENT_REDIS_KEY_TEMPLATE % self.name, "choices")
+        pipe.hget(EXPERIMENT_REDIS_KEY_TEMPLATE % self.name, "default-choice")
+        results = pipe.execute()
 
-        if not payload:
-            raise ExperimentException(self.name, "does not exist")
+        if results[0] == None:
+            raise ExperimentException(self.name, "Does not exist")
 
-        self.metadata = parse_json(payload["metadata"])
-        self.choice_names = parse_json(payload.get("choices")) or []
-        self.default_choice = escape.to_unicode(payload.get("default-choice"))
+        self.metadata = parse_json(results[0])
+        self.choice_names = parse_json(results[1]) if results[1] != None else []
+        self.default_choice = escape.to_unicode(results[2])
         self._choices = None
 
     @property
@@ -230,6 +234,16 @@ class Experiment(object):
         self.redis.hset(EXPERIMENT_REDIS_KEY_TEMPLATE % self.name, "choices", escape.json_encode(self.choice_names))
         self.refresh()
 
+    def add_play(self, choice, count=1):
+        """Increments the play count for a given experiment choice"""
+        self.redis.hincrby(EXPERIMENT_REDIS_KEY_TEMPLATE % self.name, "%s:plays" % choice, count)
+        self._choices = None
+
+    def add_reward(self, choice, count=1):
+        """Increments the reward count for a given experiment choice"""
+        self.redis.hincrby(EXPERIMENT_REDIS_KEY_TEMPLATE % self.name, "%s:rewards" % choice, count)
+        self._choices = None
+
     def compute_default_choice(self):
         """Computes and sets the default choice"""
 
@@ -255,16 +269,6 @@ class ExperimentChoice(object):
         self.rewards = int(self.experiment.redis.hget(redis_key, "%s:rewards" % self.name) or 0)
         self.performance = float(self.rewards) / max(self.plays, 1)
 
-    def add_play(self, count=1):
-        """Increments the play count for a given experiment choice"""
-        self.experiment.redis.hincrby(EXPERIMENT_REDIS_KEY_TEMPLATE % self.experiment.name, "%s:plays" % self.name, count)
-        self.refresh()
-
-    def add_reward(self, count=1):
-        """Increments the reward count for a given experiment choice"""
-        self.experiment.redis.hincrby(EXPERIMENT_REDIS_KEY_TEMPLATE % self.experiment.name, "%s:rewards" % self.name, count)
-        self.refresh()
-
 def add_experiment(redis, name):
     """Adds a new experiment"""
 
@@ -284,4 +288,4 @@ def get_experiments(redis, active=True):
     """Gets the full list of experiments"""
 
     key = ACTIVE_EXPERIMENTS_REDIS_KEY if active else ARCHIVED_EXPERIMENTS_REDIS_KEY
-    return [Experiment(redis, name) for name in redis.smembers(key)]
+    return [Experiment(redis, escape.to_unicode(name)) for name in redis.smembers(key)]

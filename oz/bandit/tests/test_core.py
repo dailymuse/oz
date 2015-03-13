@@ -76,7 +76,8 @@ class SyncFromSpecTestCase(BanditCoreTestCase):
         self.assertEqual(oz.bandit.Experiment(redis, "ex-sync-2").choice_names, ["d", "e", "f"])
 
         # Check that ex-sync-3 has the modified choices
-        self.assertEqual(oz.bandit.Experiment(redis, "ex-sync-3").choice_names, ["g", "h", "j", "k"])
+        # Compares sets since the choices could be arbitrarily reordered
+        self.assertEqual(set(oz.bandit.Experiment(redis, "ex-sync-3").choice_names), set(["g", "h", "j", "k"]))
 
         # Check that ex-sync-4 has been setup
         self.assertEqual(oz.bandit.Experiment(redis, "ex-sync-4").choice_names, ["l", "m", "n"])
@@ -143,10 +144,15 @@ class ExperimentTestCase(BanditCoreTestCase):
         experiment.compute_default_choice()
         self.assertEqual(experiment.default_choice, "A")
 
-        # Should set it to B
-        experiment.choices[1].add_play()
-        self.assertEqual(experiment.default_choice, "B")
+        # Should keep it at A
+        experiment.add_play("B")
+        experiment.compute_default_choice()
+        self.assertEqual(experiment.default_choice, "A")
 
+        # Should set it to B
+        experiment.add_reward("B")
+        experiment.compute_default_choice()
+        self.assertEqual(experiment.default_choice, "B")
 
     def test_confidence(self):
         redis = oz.redis.create_connection()
@@ -156,17 +162,15 @@ class ExperimentTestCase(BanditCoreTestCase):
         experiment.add_choice("arm2")
 
         # Add data to the experiment
-        experiment.choices[0].add_play(count=17)
-        experiment.choices[0].add_reward(count=3)
-        experiment.choices[1].add_play(count=19)
-        experiment.choices[1].add_reward(count=2)
+        experiment.add_play("arm1", count=17)
+        experiment.add_reward("arm1", count=3)
+        experiment.add_play("arm2", count=19)
+        experiment.add_reward("arm2", count=2)
 
         csq, confident = experiment.confidence()
         self.assertEqual(round(csq, 3), 0.380)
         self.assertFalse(confident)
 
-@oz.test
-class ExperimentChoiceTestCase(BanditCoreTestCase):
     def test_add_play(self):
         redis = oz.redis.create_connection()
 
@@ -174,7 +178,7 @@ class ExperimentChoiceTestCase(BanditCoreTestCase):
         experiment.add_choice("foo")
 
         self.assertEqual(experiment.choices[0].plays, 0)
-        experiment.choices[0].add_play()
+        experiment.add_play("foo")
         self.assertEqual(experiment.choices[0].plays, 1)
 
     def test_add_reward(self):
@@ -184,5 +188,5 @@ class ExperimentChoiceTestCase(BanditCoreTestCase):
         experiment.add_choice("foo")
 
         self.assertEqual(experiment.choices[0].rewards, 0)
-        experiment.choices[0].add_reward()
+        experiment.add_reward("foo")
         self.assertEqual(experiment.choices[0].rewards, 1)
