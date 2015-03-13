@@ -73,4 +73,4 @@ class BanditTestingMiddleware(object):
         """
         choice = self.get_experiment_choice(name)
         experiment = oz.bandit.Experiment(self.redis(), name)
-        experiment.add_play(choice)
+        experiment.add_reward(choice)
