@@ -171,6 +171,7 @@ class Experiment(object):
         self.refresh()
 
     def refresh(self):
+        """Re-pulls the data from redis"""
         pipe = self.redis.pipeline()
         pipe.hget(EXPERIMENT_REDIS_KEY_TEMPLATE % self.name, "metadata")
         pipe.hget(EXPERIMENT_REDIS_KEY_TEMPLATE % self.name, "choices")
@@ -195,6 +196,12 @@ class Experiment(object):
         return self._choices
 
     def confidence(self):
+        """
+        Returns a tuple (chi squared, confident) of the experiment. Confident
+        is simply a boolean specifying whether we're > 95%% sure that the
+        results are statistically significant.
+        """
+
         choices = self.choices
 
         # Get the chi-squared between the top two choices, if more than two choices exist
@@ -258,12 +265,16 @@ class Experiment(object):
         return high_choice
 
 class ExperimentChoice(object):
+    """Represents an experiment choice"""
+
     def __init__(self, experiment, name):
         self.experiment = experiment
         self.name = name
         self.refresh()
 
     def refresh(self):
+        """Re-pulls the data from redis"""
+
         redis_key = EXPERIMENT_REDIS_KEY_TEMPLATE % self.experiment.name
         self.plays = int(self.experiment.redis.hget(redis_key, "%s:plays" % self.name) or 0)
         self.rewards = int(self.experiment.redis.hget(redis_key, "%s:rewards" % self.name) or 0)
