@@ -19,6 +19,7 @@ from .actions import *
 from .middleware import *
 from .options import *
 from .tests import *
+from .uimodules import *
 
 def static_url(redis, path):
     """Gets the static path for a file"""
@@ -27,15 +28,15 @@ def static_url(redis, path):
 
 def get_cache_buster(redis, path):
     """Gets the cache buster value for a given file path"""
-    return escape.to_unicode(redis.hget("cache-buster:v1", path))
+    return escape.to_unicode(redis.hget("cache-buster:v2", path))
 
 def set_cache_buster(redis, path, hash):
     """Sets the cache buster value for a given file path"""
-    redis.hset("cache-buster:v1", path, hash)
+    redis.hset("cache-buster:v2", path, hash)
 
 def remove_cache_buster(redis, path):
     """Removes the cache buster for a given file"""
-    redis.hdel("cache-buster:v1", path)
+    redis.hdel("cache-buster:v2", path)
 
 def get_bucket(s3_bucket=None, validate=False):
     """Gets a bucket from specified settings"""
@@ -70,7 +71,7 @@ class CDNFile(object):
 
     def hash(self, override=""):
         """Creates a cache buster value for the file"""
-        return hashlib.md5(override.encode('utf-8') + self.contents()).hexdigest()
+        return hashlib.sha256(override.encode('utf-8') + self.contents()).hexdigest()
 
     def path(self):
         """Gets the path of the file"""
