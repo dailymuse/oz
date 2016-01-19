@@ -33,10 +33,14 @@ class Script(Subresource):
         if sip:
             integrity = self.get_integrity(url)
 
-            if integrity:
+            if integrity and "integrity" not in attrs:
                 attrs["integrity"] = integrity
             
-            attrs["crossorigin"] = crossorigin
+            if "crossorigin" not in attrs:
+                attrs["crossorigin"] = crossorigin
+
+        if "src" not in attrs:
+            attrs["src"] = url
 
         attr_strs = ['%s="%s"' % (xhtml_escape(k), xhtml_escape(v)) for (k, v) in attrs.items()]
         return "<script %s></script>" % " ".join(attr_strs)
@@ -49,10 +53,13 @@ class Stylesheet(Subresource):
         if sip:
             integrity = self.get_integrity(url)
             
-            if integrity:
+            if integrity and "integrity" not in attrs:
                 attrs["integrity"] = integrity
-        if not "rel" in attrs:
+
+        if "rel" not in attrs:
             attrs["rel"] = "stylesheet"
+        if "href" not in attrs:
+            attrs["href"] = url
 
         attr_strs = ['%s="%s"' % (xhtml_escape(k), xhtml_escape(v)) for (k, v) in attrs.items()]
         return "<link %s />" % " ".join(attr_strs)
