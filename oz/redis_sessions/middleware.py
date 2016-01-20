@@ -24,7 +24,7 @@ class RedisSessionMiddleware(object):
 
             if not session_id:
                 session_id = oz.redis_sessions.random_hex(20)
-                self.set_secure_cookie("session_id", session_id.encode('utf-8'), httponly=True)
+                self.set_secure_cookie("session_id", session_id.encode('utf-8'))
 
             password_salt = oz.settings["session_salt"]
             self._cached_session_key = "session:%s:v4" % oz.redis_sessions.password_hash(session_id, password_salt=password_salt)

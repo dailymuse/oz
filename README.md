@@ -340,3 +340,7 @@ sessions). Transactions will be committed if a request handler returns a
 status code between 200 and 399, and rollback otherwise. You can access the
 SQLAlchemy session via `self.db()` once the middleware is attached
 (`oz.sqlalchemy.SQLAlchemyMiddleware`).
+
+### Secure Cookies (`oz.secure_cookies`) ###
+Augments tornado's `set_secure_cookie` method by setting the `secure` and 
+`httponly` flags for cookies. 

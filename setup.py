@@ -28,6 +28,7 @@ setup(
         "oz.sqlalchemy",
         "oz.error_pages",
         "oz.error_pages.tests",
+        "oz.secure"
     ],
 
     package_data = {

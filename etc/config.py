@@ -12,6 +12,7 @@ plugins = [
     "oz.redis_sessions",
     "oz.sqlalchemy",
     "oz.error_pages",
+    "oz.secure"
 ]
 
 app_options = dict(
