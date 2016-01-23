@@ -23,7 +23,7 @@ class Subresource(tornado.web.UIModule):
         else:
             # v_arg contains the hash in hex encoding - we need to convert it
             # to base64
-            return "sha256-%s" % binascii.b2a_base64(v_arg.decode("hex"))
+            return "sha256-%s" % binascii.b2a_base64(bytes.fromhex(v_arg))
 
 @oz.uimodule
 class Script(Subresource):
