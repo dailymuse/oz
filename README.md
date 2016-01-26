@@ -96,7 +96,7 @@ An example handler using API middleware:
         def get(self):
             self.respond({"foo": "bar"})
 
-    oz.route("/", ExampleApiHandler)
+    oz.route(("/", ExampleApiHandler))
 
 ## Middleware ##
 
