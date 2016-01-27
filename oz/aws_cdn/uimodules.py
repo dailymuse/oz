@@ -22,8 +22,9 @@ class Subresource(tornado.web.UIModule):
             return None
         else:
             # v_arg contains the hash in hex encoding - we need to convert it
-            # to base64
-            return "sha256-%s" % binascii.b2a_base64(bytes.fromhex(v_arg))
+            # to base64. This roundabout method should work in both python 2
+            # 3.
+            return "sha256-%s" % str(binascii.b2a_base64(bytearray.fromhex(v_arg)).strip())
 
 @oz.uimodule
 class Script(Subresource):
