@@ -17,18 +17,17 @@ def cache_busting_scan(*prefixes):
     prefixes.
     """
 
-    settings = oz.settings
     redis = oz.redis.create_connection()
     pipe = redis.pipeline()
 
     # Get all items that match any of the patterns. Put it in a set to
     # prevent duplicates.
-    if settings["s3_bucket"]:
+    if oz.settings["s3_bucket"]:
         bucket = oz.aws_cdn.get_bucket()
         matches = set([oz.aws_cdn.S3File(key) for prefix in prefixes for key in bucket.list(prefix)])
     else:
         matches = set([])
-        static_path = settings["static_path"]
+        static_path = oz.settings["static_path"]
         
         for root, _, filenames in os.walk(static_path):
             for filename in filenames:
@@ -41,7 +40,7 @@ def cache_busting_scan(*prefixes):
 
     # Set the cache busters
     for f in matches:
-        file_hash = f.hash(override=settings.get("hash_override", ""))
+        file_hash = f.hash()
         print(file_hash, f.path())
         oz.aws_cdn.set_cache_buster(pipe, f.path(), file_hash)
 
