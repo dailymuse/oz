@@ -48,7 +48,7 @@ class Script(Subresource):
 
 @oz.uimodule
 class Stylesheet(Subresource):
-    def render(self, path, sip=True, **attrs):
+    def render(self, path, sip=True, crossorigin="anonymous", **attrs):
         url = self.handler.cdn_static_url(path)
 
         if sip:
@@ -56,6 +56,9 @@ class Stylesheet(Subresource):
             
             if integrity and "integrity" not in attrs:
                 attrs["integrity"] = integrity
+            
+            if "crossorigin" not in attrs:
+                attrs["crossorigin"] = crossorigin
 
         if "rel" not in attrs:
             attrs["rel"] = "stylesheet"
