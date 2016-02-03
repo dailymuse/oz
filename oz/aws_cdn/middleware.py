@@ -43,7 +43,7 @@ class CDNMiddleware(object):
         """
         f = self.get_file(path)
         f.upload(contents, replace=replace)
-        self.set_cache_buster(path, f.hash(override=oz.settings.get("hash_override", "")))
+        self.set_cache_buster(path, f.hash())
 
     def copy_file(self, from_path, to_path, replace=False):
         """

@@ -9,5 +9,4 @@ oz.options(
     aws_secret_key = dict(type=str, help="AWS secret key for CDN"),
     static_host = dict(type=str, help="CDN hostname for static assets"),
     s3_bucket = dict(type=str, default=None, help="S3 bucket for uploading CDN assets"),
-    hash_override = dict(type=str, default="", help="Sets the hash override, which can be changed to forcibly alter all cache buster values")
 )

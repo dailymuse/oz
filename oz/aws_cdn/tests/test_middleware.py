@@ -63,7 +63,7 @@ class CDNMiddlewareTestCase(oz.testing.OzTestCase):
 
         # Kill the created key
         redis = oz.redis.create_connection()
-        redis.delete("cache-buster:v1")
+        redis.delete("cache-buster:v2")
 
         # Kill any test files
         for f in os.listdir("static"):
