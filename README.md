@@ -96,7 +96,7 @@ An example handler using API middleware:
         def get(self):
             self.respond({"foo": "bar"})
 
-    oz.route("/", ExampleApiHandler)
+    oz.route(("/", ExampleApiHandler))
 
 ## Middleware ##
 
@@ -247,14 +247,7 @@ Which will print `Hello, Jose!` in the template.
 
 ## Built-In Plugins ##
 
-Oz comes with a number of built-in plugins to faciliate rapid development. You
-can get details of what these plugins expose via:
-
-    oz explore <plugin name>
-
-Example:
-
-    oz explore oz.core
+Oz comes with a number of built-in plugins to faciliate rapid development.
 
 ### Core (`oz.core`) ###
 
