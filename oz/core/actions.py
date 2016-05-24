@@ -77,7 +77,7 @@ def server():
         else:
             ssl_options = None
 
-        srv = tornado.httpserver.HTTPServer(application, ssl_options=ssl_options)
+        srv = tornado.httpserver.HTTPServer(application, ssl_options=ssl_options, xheaders=oz.settings["xheaders"])
         srv.bind(oz.settings["port"])
 
         if oz.settings["debug"]:

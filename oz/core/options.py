@@ -14,6 +14,7 @@ oz.options(
     gzip = dict(type=bool, help="Enables gzip output."),
     wsgi_mode = dict(type=bool, default=False, help="Use WSGI mode."),
     server_workers = dict(type=int, default=1, help="The number of server workers to run concurrently."),
+    xheaders = dict(type=bool, default=False, help="Determine remote_ip from X-Remote-Ip/X-Forwarded-For headers"),
 
     ssl_cert_file = dict(type=str, default=None, help="The SSL certificate file. If unspecified, SSL support will be disabled."),
     ssl_key_file = dict(type=str, default=None, help="The SSL key file. If unspecified, SSL support will be disabled."),
