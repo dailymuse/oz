@@ -14,6 +14,7 @@ import unittest
 import os
 import functools
 import re
+import xmlrunner
 
 VALID_PROJECT_NAME = re.compile(r"^\w+$")
 
@@ -121,5 +122,6 @@ def test(*filters):
             child_suite = unittest.makeSuite(t, "test")
             suite.addTest(child_suite)
 
-    res = unittest.TextTestRunner().run(suite)
+    test_runner = xmlrunner.XMLTestRunner(output=oz.settings["test_output_file"]) if oz.settings["xml_test_output"] else unittest.TextTestRunner(stream=oz.settings["test_output_file"])
+    res = test_runner.run(suite)
     return 1 if len(res.errors) > 0 or len(res.failures) > 0 else 0
