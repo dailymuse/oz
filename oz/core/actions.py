@@ -122,6 +122,10 @@ def test(*filters):
             child_suite = unittest.makeSuite(t, "test")
             suite.addTest(child_suite)
 
-    test_runner = xmlrunner.XMLTestRunner(output=oz.settings["test_output_file"]) if oz.settings["xml_test_output"] else unittest.TextTestRunner(stream=oz.settings["test_output_file"])
-    res = test_runner.run(suite)
+    if oz.settings["xml_test_output"]:
+        with open(oz.settings["test_output_file"], "wb") as output:
+            res = xmlrunner.XMLTestRunner(output=output, failfast=False, buffer=False, catchbreak=False).run(suite)
+    else:
+        res = unittest.TextTestRunner(stream=oz.settings["test_output_file"]).run()
+
     return 1 if len(res.errors) > 0 or len(res.failures) > 0 else 0
