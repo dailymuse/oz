@@ -122,10 +122,12 @@ def test(*filters):
             child_suite = unittest.makeSuite(t, "test")
             suite.addTest(child_suite)
 
-    if oz.settings["xml_test_output"]:
+    if not oz.settings["xml_test_output"]:
+        res = unittest.TextTestRunner().run(suite)
+    elif oz.settings["test_output_file"]:
         with open(oz.settings["test_output_file"], "wb") as output:
-            res = xmlrunner.XMLTestRunner(output=output, failfast=False, buffer=False, catchbreak=False).run(suite)
+            res = xmlrunner.XMLTestRunner(output=output).run(suite)
     else:
-        res = unittest.TextTestRunner(stream=oz.settings["test_output_file"]).run()
-
+        raise Exception("must specify an output file if using xml test output")
+        
     return 1 if len(res.errors) > 0 or len(res.failures) > 0 else 0
