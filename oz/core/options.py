@@ -17,6 +17,7 @@ oz.options(
     server_workers = dict(type=int, default=1, help="The number of server workers to run concurrently."),
     xml_test_output = dict(type=bool, default=False, help="Output testing results in JUnit-style XML format instead of standard text format"),
     test_output_file = dict(type=str, default=sys.stdout, help="The file to write test output to"),
+    body_timeout = dict(type=int, default=None, help="How long to wait in seconds while reading the request body"),
 
     ssl_cert_file = dict(type=str, default=None, help="The SSL certificate file. If unspecified, SSL support will be disabled."),
     ssl_key_file = dict(type=str, default=None, help="The SSL key file. If unspecified, SSL support will be disabled."),
