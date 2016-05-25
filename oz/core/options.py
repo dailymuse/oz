@@ -15,7 +15,7 @@ oz.options(
     wsgi_mode = dict(type=bool, default=False, help="Use WSGI mode."),
     server_workers = dict(type=int, default=1, help="The number of server workers to run concurrently."),
     body_timeout = dict(type=int, default=None, help="How long to wait in seconds while reading the request body"),
-
+    xheaders = dict(type=bool, default=False, help="Determine remote_ip from X-Remote-Ip/X-Forwarded-For headers"),
     ssl_cert_file = dict(type=str, default=None, help="The SSL certificate file. If unspecified, SSL support will be disabled."),
     ssl_key_file = dict(type=str, default=None, help="The SSL key file. If unspecified, SSL support will be disabled."),
     ssl_cert_reqs = dict(type=int, default=0, help="Whether certificates are required from the other side of the connection. 0 = certificates ignored, 1 = certificates optional, 2 = certificates required."),
