@@ -128,6 +128,7 @@ def test(*filters):
         with open(oz.settings["test_output_file"], "wb") as output:
             res = xmlrunner.XMLTestRunner(output=output).run(suite)
     else:
+        # this should be impossible as there is a default output file
         raise Exception("must specify an output file if using xml test output")
         
     return 1 if len(res.errors) > 0 or len(res.failures) > 0 else 0
