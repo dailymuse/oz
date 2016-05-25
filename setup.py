@@ -40,7 +40,8 @@ setup(
 
     install_requires = [
         "tornado>=3.1",
-        "optfn==0.4.1"
+        "optfn==0.4.1",
+        "unittest-xml-reporting==2.1.0"
     ],
 
     extras_require = {
