@@ -55,7 +55,7 @@ def engine():
         if oz.settings["db_pool_timeout"]:
             kwargs["pool_timeout"] = oz.settings["db_pool_timeout"]
 
-        _engine = create_engine(oz.settings["db"], **kwargs)
+        _engine = create_engine(oz.settings["db"], echo_pool=false, **kwargs)
         after_fork.registered = True
         register_after_fork(after_fork, after_fork)
 
