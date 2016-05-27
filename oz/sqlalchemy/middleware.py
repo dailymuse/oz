@@ -14,7 +14,7 @@ class SQLAlchemyMiddleware(object):
 
     def db(self):
         """Gets the SQLALchemy session for this request"""
-
+        print("hey there everybody")
         if not hasattr(self, "db_conn"):
             self.db_conn = oz.sqlalchemy.session()
 
@@ -30,5 +30,5 @@ class SQLAlchemyMiddleware(object):
                 self.db_conn.commit()
             else:
                 self.db_conn.rollback()
-
+            print("closing that connection")
             self.db_conn.close()

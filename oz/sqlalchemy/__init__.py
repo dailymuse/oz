@@ -46,7 +46,7 @@ def engine():
     global _engine
 
     if _engine == None:
-        kwargs = dict(echo=oz.settings["debug_sql"])
+        kwargs = dict(echo=oz.settings["debug_sql"], echo_pool=True)
 
         if oz.settings["db_pool_size"]:
             kwargs["pool_size"] = oz.settings["db_pool_size"]
@@ -55,7 +55,7 @@ def engine():
         if oz.settings["db_pool_timeout"]:
             kwargs["pool_timeout"] = oz.settings["db_pool_timeout"]
 
-        _engine = create_engine(oz.settings["db"], echo_pool=false, **kwargs)
+        _engine = create_engine(oz.settings["db"], **kwargs)
         after_fork.registered = True
         register_after_fork(after_fork, after_fork)
 
