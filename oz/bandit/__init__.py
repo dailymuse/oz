@@ -3,7 +3,6 @@
 from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
 
 from tornado import escape, util
-from tornado.log import app_log as logger
 from .actions import *
 from .middleware import *
 from .tests import *
@@ -180,7 +179,7 @@ class Experiment(object):
         results = pipe.execute()
 
         if results[0] == None:
-            logger.warning(self.name, "Does not exist")
+            raise ExperimentException(self.name, "Does not exist")
 
         self.metadata = parse_json(results[0])
         self.choice_names = parse_json(results[1]) if results[1] != None else []
