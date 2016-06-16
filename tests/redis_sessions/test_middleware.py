@@ -39,7 +39,7 @@ class RedisSessionMiddlewareTestCase(oz.testing.OzTestCase):
 
     def tearDown(self):
         super(RedisSessionMiddlewareTestCase, self).tearDown()
-        
+
         # Clean up just in case there's keys still lying around
         redis = oz.redis.create_connection()
 

@@ -9,7 +9,6 @@ from tornado import escape
 
 from .middleware import *
 from .options import *
-from .tests import *
 
 def random_hex(length):
     """Generates a random hex string"""

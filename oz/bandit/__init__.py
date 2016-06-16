@@ -5,7 +5,7 @@ from __future__ import absolute_import, division, print_function, with_statement
 from tornado import escape, util
 from .actions import *
 from .middleware import *
-from .tests import *
+
 import re
 
 ACTIVE_EXPERIMENTS_REDIS_KEY = "bandit:listing:active:v2"
