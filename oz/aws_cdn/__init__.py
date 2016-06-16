@@ -18,7 +18,6 @@ from tornado import escape
 from .actions import *
 from .middleware import *
 from .options import *
-from .tests import *
 from .uimodules import *
 
 def static_url(redis, path):

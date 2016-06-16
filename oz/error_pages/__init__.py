@@ -5,7 +5,6 @@ from __future__ import absolute_import, division, print_function, with_statement
 from .middleware import *
 from .uimodules import *
 from .options import *
-from .tests import *
 
 import traceback
 import base64
@@ -41,7 +40,8 @@ def get_lines_from_file(filename, lineno, context_lines):
     Returns (pre_context_lineno, pre_context, context_line, post_context).
     """
 
-    get_lines = lambda s, e: [linecache.getline(filename, l).rstrip() for l in range(s, e)]
+    def get_lines(start, end):
+        return [linecache.getline(filename, l).rstrip() for l in range(start, end)]
 
     lower_bound = max(1, lineno - context_lines)
     upper_bound = lineno + context_lines
@@ -57,7 +57,7 @@ def get_frames(tback, is_breakpoint):
     frames = []
 
     while tback is not None:
-        if tback.tb_next == None and is_breakpoint:
+        if tback.tb_next is None and is_breakpoint:
             break
 
         filename = tback.tb_frame.f_code.co_filename
