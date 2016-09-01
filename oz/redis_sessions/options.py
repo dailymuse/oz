@@ -6,5 +6,6 @@ import oz
 
 oz.options(
     session_salt = dict(type=str, help="Salt used for session security"),
-    session_time = dict(type=int, help="Number of seconds of session inactivity before timeout")
+    session_time = dict(type=int, help="Number of seconds of session inactivity before timeout"),
+    cookie_domain = dict(type=str, help="The domain of the session cookie")
 )
