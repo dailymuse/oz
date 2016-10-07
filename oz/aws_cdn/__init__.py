@@ -27,15 +27,15 @@ def static_url(redis, path):
 
 def get_cache_buster(redis, path):
     """Gets the cache buster value for a given file path"""
-    return escape.to_unicode(redis.hget("cache-buster:v2", path))
+    return escape.to_unicode(redis.hget("cache-buster:{}:v3".format(oz.settings["s3_bucket"]), path))
 
 def set_cache_buster(redis, path, hash):
     """Sets the cache buster value for a given file path"""
-    redis.hset("cache-buster:v2", path, hash)
+    redis.hset("cache-buster:{}:v3".format(oz.settings["s3_bucket"]), path, hash)
 
 def remove_cache_buster(redis, path):
     """Removes the cache buster for a given file"""
-    redis.hdel("cache-buster:v2", path)
+    redis.hdel("cache-buster:{}:v3".format(oz.settings["s3_bucket"]), path)
 
 def get_bucket(s3_bucket=None, validate=False):
     """Gets a bucket from specified settings"""
