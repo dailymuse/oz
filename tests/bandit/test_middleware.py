@@ -19,7 +19,7 @@ class BanditMiddlewareTestCase(oz.testing.OzTestCase):
                 # Gets the choice for a given experiment
                 choice = self.get_experiment_choice(name)
 
-                if choice == None:
+                if choice is None:
                     raise web.HTTPError(404)
 
                 self.finish(choice)
@@ -46,8 +46,8 @@ class BanditMiddlewareTestCase(oz.testing.OzTestCase):
         ]
 
     def tearDown(self):
-        super(oz.bandit.BanditMiddlewareTestCase, self).tearDown()
-        
+        super(BanditMiddlewareTestCase, self).tearDown()
+
         # Clean up just in case there's keys still lying around
         redis = oz.redis.create_connection()
 

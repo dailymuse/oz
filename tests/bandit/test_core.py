@@ -12,7 +12,7 @@ class MockExperimentChoice(object):
 class BanditCoreTestCase(unittest.TestCase):
     def tearDown(self):
         super(BanditCoreTestCase, self).tearDown()
-        
+
         # Clean up just in case there's keys still lying around
         redis = oz.redis.create_connection()
 

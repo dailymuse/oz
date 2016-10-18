@@ -1,5 +1,7 @@
 import sys
 
+import tests
+
 project_name = "oz_tests"
 
 plugins = [
@@ -11,18 +13,17 @@ plugins = [
     "oz.redis",
     "oz.redis_sessions",
     "oz.sqlalchemy",
-    "oz.error_pages",
-    "oz.secure"
+    "oz.error_pages"
 ]
 
 app_options = dict(
-    port = 8000,
-    debug = True,
-    db = "sqlite:///oz_tests.db",
-    static_path = "static",
-    template_path = "templates",
-    xsrf_cookies = False,
-    gzip = False,
-    session_salt = "some salt",
-    cookie_secret = "abcdef"
+    port=8000,
+    debug=True,
+    db="sqlite:///oz_tests.db",
+    static_path="static",
+    template_path="templates",
+    xsrf_cookies=False,
+    gzip=False,
+    session_salt="some salt",
+    cookie_secret="abcdef"
 )

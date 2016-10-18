@@ -131,7 +131,23 @@ class RequestHandler(tornado.web.RequestHandler):
     def initialize(self, **kwargs):
         self.trigger("initialize", **kwargs)
 
+    def set_secure_cookie(self, name, value, **kwargs):
+        print("set_secure_cookie")
+        if oz.settings["use_secure_cookie"]:
+            print("setting cookie args")
+            if "secure" not in kwargs:
+                kwargs["secure"] = True
+            if "httponly" not in kwargs:
+                kwargs["httponly"] = True
+
+        super(RequestHandler, self).set_secure_cookie(name, value, **kwargs)
+
     def prepare(self):
+        print("prepare")
+        if oz.settings["use_hsts"]:
+            print("setting hsts header")
+            self.set_header("Strict-Transport-Security", "max-age=2592000; includeSubDomains")
+
         self.trigger("prepare")
 
     def on_finish(self):
