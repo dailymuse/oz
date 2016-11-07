@@ -4,7 +4,6 @@ from __future__ import absolute_import, division, print_function, with_statement
 
 import tornado.web
 import tornado.wsgi
-import tornado.ioloop
 import tornado.httpserver
 import wsgiref.simple_server
 import oz
@@ -94,8 +93,24 @@ def server():
         else:
             # Forks multiple sub-processes
             srv.start(oz.settings["server_workers"])
-        
+
+    ioloop = oz.settings["ioloop"]
+
+    if ioloop == "asyncio":
+        from tornado.platform.asyncio import AsyncIOMainLoop
+        import asyncio
+        AsyncIOMainLoop().install()
+        asyncio.get_event_loop().run_forever()
+    elif ioloop == "twisted":
+        from tornado.platform.twisted import TwistedIOLoop
+        from twisted.internet import reactor
+        TwistedIOLoop().install()
+        reactor.run()
+    elif ioloop == None:
+        import tornado.ioloop
         tornado.ioloop.IOLoop.instance().start()
+    else:
+        raise Exception("Unknown ioloop type: %s" % ioloop)
 
 @oz.action
 def repl():
