@@ -59,7 +59,20 @@ def init(project_name):
 def server():
     """Runs the server"""
 
-    if oz.settings["wsgi_mode"]:
+    # Get and validate the server_type
+    server_type = oz.settings["server_type"]
+    if server_type not in [None, "wsgi", "asyncio", "twisted"]:
+        raise Exception("Unknown server type: %s" % server_type)
+
+    # Install the correct ioloop if necessary
+    if server_type == "asyncio":
+        from tornado.platform.asyncio import AsyncIOMainLoop
+        AsyncIOMainLoop().install()
+    elif server_type == "twisted":
+        from tornado.platform.twisted import TwistedIOLoop
+        TwistedIOLoop().install()
+
+    if server_type == "wsgi":
         application = tornado.wsgi.WSGIApplication(oz._routes, **oz.settings)
         srv = wsgiref.simple_server.make_server("", oz.settings["port"], application)
         srv.serve_forever()
@@ -82,7 +95,7 @@ def server():
             body_timeout=oz.settings["body_timeout"],
             xheaders=oz.settings["xheaders"]
         )
-        
+
         srv.bind(oz.settings["port"])
 
         if oz.settings["debug"]:
@@ -94,23 +107,15 @@ def server():
             # Forks multiple sub-processes
             srv.start(oz.settings["server_workers"])
 
-    ioloop = oz.settings["ioloop"]
-
-    if ioloop == "asyncio":
-        from tornado.platform.asyncio import AsyncIOMainLoop
-        import asyncio
-        AsyncIOMainLoop().install()
-        asyncio.get_event_loop().run_forever()
-    elif ioloop == "twisted":
-        from tornado.platform.twisted import TwistedIOLoop
-        from twisted.internet import reactor
-        TwistedIOLoop().install()
-        reactor.run()
-    elif ioloop == None:
-        from tornado import ioloop
-        ioloop.IOLoop.instance().start()
-    else:
-        raise Exception("Unknown ioloop type: %s" % ioloop)
+        if server_type == "asyncio":
+            import asyncio
+            asyncio.get_event_loop().run_forever()
+        elif server_type == "twisted":
+            from twisted.internet import reactor
+            reactor.run()
+        else:
+            from tornado import ioloop
+            ioloop.IOLoop.instance().start()
 
 @oz.action
 def repl():

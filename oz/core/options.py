@@ -20,5 +20,5 @@ oz.options(
     ssl_key_file = dict(type=str, default=None, help="The SSL key file. If unspecified, SSL support will be disabled."),
     ssl_cert_reqs = dict(type=int, default=0, help="Whether certificates are required from the other side of the connection. 0 = certificates ignored, 1 = certificates optional, 2 = certificates required."),
     ssl_ca_certs = dict(type=str, default=None, help="SSL CA certificates file."),
-    ioloop = dict(type=str, default=None, help="If set, an alternative IOLoop will be used rather than the default one. Valid options: 'asyncio', 'twisted'."),
+    server_type = dict(type=str, default=None, help="By default, tornado will be started with the default ioloop. If this is set, a custom server can be used instead. Valid options: 'asyncio', 'twisted' or 'wsgi'."),
 )
