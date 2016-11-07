@@ -107,8 +107,8 @@ def server():
         TwistedIOLoop().install()
         reactor.run()
     elif ioloop == None:
-        import tornado.ioloop
-        tornado.ioloop.IOLoop.instance().start()
+        from tornado import ioloop
+        ioloop.IOLoop.instance().start()
     else:
         raise Exception("Unknown ioloop type: %s" % ioloop)
 
