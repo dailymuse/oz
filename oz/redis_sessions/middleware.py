@@ -24,7 +24,6 @@ class RedisSessionMiddleware(object):
 
             if not session_id:
                 session_id = oz.redis_sessions.random_hex(20)
-                print("setting session id")
                 self.set_secure_cookie(
                     name="session_id",
                     value=session_id.encode('utf-8'),

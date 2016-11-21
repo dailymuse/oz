@@ -131,7 +131,6 @@ class RequestHandler(tornado.web.RequestHandler):
         self.trigger("initialize", **kwargs)
 
     def set_secure_cookie(self, name, value, **kwargs):
-        print(name, value)
         if self.settings["use_secure_cookie"]:
             if "secure" not in kwargs:
                 kwargs["secure"] = True
@@ -142,6 +141,10 @@ class RequestHandler(tornado.web.RequestHandler):
     def prepare(self):
         if self.settings["use_hsts"]:
             self.set_header("Strict-Transport-Security", "max-age=2592000; includeSubDomains")
+            # Redirect to HTTPS if necessary
+            if self.request.headers.get("X-Forwarded-Proto", self.request.protocol) != "https":
+                self.redirect("https://%s%s" % (self.request.host, self.request.uri), permanent=True)
+                return
 
         self.trigger("prepare")
 

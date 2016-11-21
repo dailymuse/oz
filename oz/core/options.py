@@ -20,6 +20,6 @@ oz.options(
     ssl_key_file = dict(type=str, default=None, help="The SSL key file. If unspecified, SSL support will be disabled."),
     ssl_cert_reqs = dict(type=int, default=0, help="Whether certificates are required from the other side of the connection. 0 = certificates ignored, 1 = certificates optional, 2 = certificates required."),
     ssl_ca_certs = dict(type=str, default=None, help="SSL CA certificates file."),
-    use_secure_cookie=dict(type=bool, help="Set secure cookies with the secure flag"),
-    use_hsts=dict(type=bool, help="Set the Strict-Transport-Security header")
+    use_secure_cookie=dict(type=bool, default=False, help="Set secure cookies with the secure flag"),
+    use_hsts=dict(type=bool, default=False, help="Set the Strict-Transport-Security header")
 )
