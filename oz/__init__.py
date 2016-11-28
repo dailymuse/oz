@@ -81,8 +81,7 @@ def plugin(namespace):
 
 class RequestHandler(tornado.web.RequestHandler):
     """
-    Builds on top of tornado's RequestHandler to provide template helpers and
-    triggers
+    Builds on top of tornado's RequestHandler to provide template helpers and triggers
     """
 
     def __init__(self, *args, **kwargs):
@@ -131,7 +130,22 @@ class RequestHandler(tornado.web.RequestHandler):
     def initialize(self, **kwargs):
         self.trigger("initialize", **kwargs)
 
+    def set_secure_cookie(self, name, value, **kwargs):
+        if self.settings["use_secure_cookie"]:
+            if "secure" not in kwargs:
+                kwargs["secure"] = True
+            if "httponly" not in kwargs:
+                kwargs["httponly"] = True
+        super(RequestHandler, self).set_secure_cookie(name, value, **kwargs)
+
     def prepare(self):
+        if self.settings["use_hsts"]:
+            self.set_header("Strict-Transport-Security", "max-age=2592000; includeSubDomains")
+            # Redirect to HTTPS if necessary
+            if self.request.headers.get("X-Forwarded-Proto", self.request.protocol) != "https":
+                self.redirect("https://%s%s" % (self.request.host, self.request.uri), permanent=True)
+                return
+
         self.trigger("prepare")
 
     def on_finish(self):

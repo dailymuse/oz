@@ -22,6 +22,7 @@ setup(
         "oz.redis",
         "oz.redis_sessions",
         "oz.sqlalchemy",
+        "oz.error_pages"
     ],
 
     package_data={
