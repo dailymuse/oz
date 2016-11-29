@@ -141,10 +141,6 @@ class RequestHandler(tornado.web.RequestHandler):
     def prepare(self):
         if self.settings["use_hsts"]:
             self.set_header("Strict-Transport-Security", "max-age=2592000; includeSubDomains")
-            # Redirect to HTTPS if necessary
-            if self.request.headers.get("X-Forwarded-Proto", self.request.protocol) != "https":
-                self.redirect("https://%s%s" % (self.request.host, self.request.uri), permanent=True)
-                return
 
         self.trigger("prepare")
 
