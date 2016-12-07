@@ -1,6 +1,6 @@
 from setuptools import setup
 
-VERSION = "0.6.0"
+VERSION = "0.7.0"
 
 setup(
     name="Oz",
@@ -22,6 +22,7 @@ setup(
         "oz.redis",
         "oz.redis_sessions",
         "oz.sqlalchemy",
+        "oz.error_pages"
     ],
 
     package_data={
