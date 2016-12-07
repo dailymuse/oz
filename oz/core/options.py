@@ -21,5 +21,7 @@ oz.options(
     ssl_cert_reqs = dict(type=int, default=0, help="Whether certificates are required from the other side of the connection. 0 = certificates ignored, 1 = certificates optional, 2 = certificates required."),
     ssl_ca_certs = dict(type=str, default=None, help="SSL CA certificates file."),
     use_secure_cookie=dict(type=bool, default=False, help="Set secure cookies with the secure flag"),
-    use_hsts=dict(type=bool, default=False, help="Set the Strict-Transport-Security header")
+    use_hsts=dict(type=bool, default=False, help="Set the Strict-Transport-Security header"),
+    use_graceful_shutdown=dict(type=bool, default=True, help="Stop the server gracefully"),
+    graceful_shutdown_timeout=dict(type=int, default=5, help="Number of seconds to wait before forcing the server to stop")
 )

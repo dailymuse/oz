@@ -2,18 +2,24 @@
 
 from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
 
-import tornado.web
-import tornado.wsgi
-import tornado.ioloop
-import tornado.httpserver
-import wsgiref.simple_server
-import oz
+import signal
 import sys
 import shutil
 import unittest
 import os
 import functools
 import re
+import time
+import wsgiref.simple_server
+
+import tornado.web
+import tornado.wsgi
+import tornado.ioloop
+import tornado.httpserver
+import tornado.log
+
+import oz
+
 
 VALID_PROJECT_NAME = re.compile(r"^\w+$")
 
@@ -61,11 +67,11 @@ def server():
     """Runs the server"""
 
     if oz.settings["wsgi_mode"]:
-        application = tornado.wsgi.WSGIApplication(oz._routes, **oz.settings)
-        srv = wsgiref.simple_server.make_server("", oz.settings["port"], application)
-        srv.serve_forever()
+        wsgi_app = tornado.wsgi.WSGIApplication(oz._routes, **oz.settings)
+        wsgi_srv = wsgiref.simple_server.make_server("", oz.settings["port"], wsgi_app)
+        wsgi_srv.serve_forever()
     else:
-        application = tornado.web.Application(oz._routes, **oz.settings)
+        web_app = tornado.web.Application(oz._routes, **oz.settings)
 
         if oz.settings["ssl_cert_file"] != None and oz.settings["ssl_key_file"] != None:
             ssl_options = {
@@ -77,24 +83,30 @@ def server():
         else:
             ssl_options = None
 
-        srv = tornado.httpserver.HTTPServer(
-            application,
+        http_srv = tornado.httpserver.HTTPServer(
+            web_app,
             ssl_options=ssl_options,
             body_timeout=oz.settings["body_timeout"],
             xheaders=oz.settings["xheaders"]
         )
-        
-        srv.bind(oz.settings["port"])
+
+        http_srv.bind(oz.settings["port"])
 
         if oz.settings["debug"]:
             if oz.settings["server_workers"] != 1:
                 print("WARNING: Debug is enabled, but multiple server workers have been configured. Only one server worker can run in debug mode.")
 
-            srv.start(1)
+            http_srv.start(1)
         else:
             # Forks multiple sub-processes
-            srv.start(oz.settings["server_workers"])
-        
+            http_srv.start(oz.settings["server_workers"])
+
+        if oz.settings.get("use_graceful_shutdown"):
+            # NOTE: Do not expect any logging to with certain tools (e.g., invoker),
+            # because they may quiet logs on SIGINT/SIGTERM
+            signal.signal(signal.SIGTERM, functools.partial(_shutdown_handler, http_srv))
+            signal.signal(signal.SIGINT, functools.partial(_shutdown_handler, http_srv))
+
         tornado.ioloop.IOLoop.instance().start()
 
 @oz.action
@@ -129,3 +141,21 @@ def test(*filters):
 
     res = unittest.TextTestRunner().run(suite)
     return 1 if len(res.errors) > 0 or len(res.failures) > 0 else 0
+
+def _shutdown_handler(http_srv, sig, frame):
+    io_loop = tornado.ioloop.IOLoop.instance()
+
+    def stop_loop(deadline_seconds):
+        now = time.time()
+        if now < deadline_seconds and io_loop._callbacks:
+            io_loop.add_timeout(now + 1, stop_loop, deadline_seconds)
+        else:
+            io_loop.stop()
+
+    def shutdown():
+        tornado.log.app_log.info("Shutting down server....")
+        http_srv.stop()
+        stop_loop(time.time() + oz.settings.get("graceful_shutdown_timeout", 5))
+
+    tornado.log.app_log.warning("Received %s", sig)
+    io_loop.add_callback_from_signal(shutdown)
