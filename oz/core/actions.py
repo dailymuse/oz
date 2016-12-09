@@ -2,24 +2,23 @@
 
 from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
 
+import wsgiref.simple_server
 import signal
+import time
 import sys
 import shutil
 import unittest
 import os
 import functools
 import re
-import time
-import wsgiref.simple_server
 
 import tornado.web
 import tornado.wsgi
-import tornado.ioloop
 import tornado.httpserver
+import tornado.ioloop
 import tornado.log
 
 import oz
-
 
 VALID_PROJECT_NAME = re.compile(r"^\w+$")
 
@@ -66,7 +65,20 @@ def init(project_name):
 def server():
     """Runs the server"""
 
-    if oz.settings["wsgi_mode"]:
+    # Get and validate the server_type
+    server_type = oz.settings["server_type"]
+    if server_type not in [None, "wsgi", "asyncio", "twisted"]:
+        raise Exception("Unknown server type: %s" % server_type)
+
+    # Install the correct ioloop if necessary
+    if server_type == "asyncio":
+        from tornado.platform.asyncio import AsyncIOMainLoop
+        AsyncIOMainLoop().install()
+    elif server_type == "twisted":
+        from tornado.platform.twisted import TwistedIOLoop
+        TwistedIOLoop().install()
+
+    if server_type == "wsgi":
         wsgi_app = tornado.wsgi.WSGIApplication(oz._routes, **oz.settings)
         wsgi_srv = wsgiref.simple_server.make_server("", oz.settings["port"], wsgi_app)
         wsgi_srv.serve_forever()
@@ -102,12 +114,23 @@ def server():
             http_srv.start(oz.settings["server_workers"])
 
         if oz.settings.get("use_graceful_shutdown"):
-            # NOTE: Do not expect any logging to with certain tools (e.g., invoker),
-            # because they may quiet logs on SIGINT/SIGTERM
-            signal.signal(signal.SIGTERM, functools.partial(_shutdown_handler, http_srv))
-            signal.signal(signal.SIGINT, functools.partial(_shutdown_handler, http_srv))
+            if server_type == "asyncio" or server_type == "twisted":
+                print("WARNING: Cannot enable graceful shutdown for asyncio or twisted server types.")
+            else:
+                # NOTE: Do not expect any logging to with certain tools (e.g., invoker),
+                # because they may quiet logs on SIGINT/SIGTERM
+                signal.signal(signal.SIGTERM, functools.partial(_shutdown_tornado_ioloop, http_srv))
+                signal.signal(signal.SIGINT, functools.partial(_shutdown_tornado_ioloop, http_srv))
 
-        tornado.ioloop.IOLoop.instance().start()
+        if server_type == "asyncio":
+            import asyncio
+            asyncio.get_event_loop().run_forever()
+        elif server_type == "twisted":
+            from twisted.internet import reactor
+            reactor.run()
+        else:
+            from tornado import ioloop
+            ioloop.IOLoop.instance().start()
 
 @oz.action
 def repl():
@@ -142,7 +165,7 @@ def test(*filters):
     res = unittest.TextTestRunner().run(suite)
     return 1 if len(res.errors) > 0 or len(res.failures) > 0 else 0
 
-def _shutdown_handler(http_srv, sig, frame):
+def _shutdown_tornado_ioloop(http_srv, sig, frame):
     io_loop = tornado.ioloop.IOLoop.instance()
 
     def stop_loop(deadline_seconds):
