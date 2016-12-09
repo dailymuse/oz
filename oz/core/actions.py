@@ -114,10 +114,13 @@ def server():
             http_srv.start(oz.settings["server_workers"])
 
         if oz.settings.get("use_graceful_shutdown"):
-            # NOTE: Do not expect any logging to with certain tools (e.g., invoker),
-            # because they may quiet logs on SIGINT/SIGTERM
-            signal.signal(signal.SIGTERM, functools.partial(_shutdown_handler, http_srv))
-            signal.signal(signal.SIGINT, functools.partial(_shutdown_handler, http_srv))
+            if server_type == "asyncio" or server_type == "twisted":
+                print("WARNING: Cannot enable graceful shutdown for asyncio or twisted server types.")
+            else:
+                # NOTE: Do not expect any logging to with certain tools (e.g., invoker),
+                # because they may quiet logs on SIGINT/SIGTERM
+                signal.signal(signal.SIGTERM, functools.partial(_shutdown_tornado_ioloop, http_srv))
+                signal.signal(signal.SIGINT, functools.partial(_shutdown_tornado_ioloop, http_srv))
 
         if server_type == "asyncio":
             import asyncio
@@ -162,7 +165,7 @@ def test(*filters):
     res = unittest.TextTestRunner().run(suite)
     return 1 if len(res.errors) > 0 or len(res.failures) > 0 else 0
 
-def _shutdown_handler(http_srv, sig, frame):
+def _shutdown_tornado_ioloop(http_srv, sig, frame):
     io_loop = tornado.ioloop.IOLoop.instance()
 
     def stop_loop(deadline_seconds):
