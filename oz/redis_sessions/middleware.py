@@ -46,6 +46,18 @@ class RedisSessionMiddleware(object):
         if session_time:
             self.redis().expire(self._session_key, session_time)
 
+    # useful for upgrading an anonymous session to an authenticated session
+    def rename_session_token(self):
+        new_session_id= oz.redis_sessions.random_hex(20)
+        self.set_secure_cookie(
+                    name="session_id",
+                    value=new_session_id.encode('utf-8'),
+                    domain=oz.settings.get("cookie_domain"),
+                    httponly=True)
+        self._new_cached_session_key = "session:%s:v4" % oz.redis_sessions.password_hash(new_session_id, password_salt=oz.settings["session_salt"])
+        self.redis().rename(self._cached_session_key, self._new_cached_session_key)
+        self._cached_session_key = self._new_cached_session_key
+
     def get_session_value(self, name, default=None):
         """Gets a session value"""
 
