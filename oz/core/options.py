@@ -12,7 +12,6 @@ oz.options(
     xsrf_cookies = dict(type=bool, default=False, help="Enable cookies that prevent XSRF attacks."),
     cookie_secret = dict(type=str, help="Secret used for secure cookies. Required if you set xsrf_cookies=True."),
     gzip = dict(type=bool, help="Enables gzip output."),
-    wsgi_mode = dict(type=bool, default=False, help="Use WSGI mode."),
     server_workers = dict(type=int, default=1, help="The number of server workers to run concurrently."),
     body_timeout = dict(type=int, default=None, help="How long to wait in seconds while reading the request body"),
     xheaders = dict(type=bool, default=False, help="Determine remote_ip from X-Remote-Ip/X-Forwarded-For headers"),
