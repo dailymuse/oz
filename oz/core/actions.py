@@ -104,15 +104,20 @@ def server():
 
         http_srv.bind(oz.settings["port"])
 
-        if oz.settings["debug"]:
-            if oz.settings["server_workers"] != 1:
+        server_workers = oz.settings["server_workers"]
+
+        if server_workers > 1:
+            if oz.settings["debug"]:
                 print("WARNING: Debug is enabled, but multiple server workers have been configured. Only one server worker can run in debug mode.")
+                server_workers = 1
+            elif (server_type == "asyncio" or server_type == "twisted"):
+                print("WARNING: A non-default server type is being used, but multiple server workers have been configured. Only one server worker can run on a non-default server type.")
+                server_workers = 1
 
-            http_srv.start(1)
-        else:
-            # Forks multiple sub-processes
-            http_srv.start(oz.settings["server_workers"])
+        # Forks multiple sub-processes if server_workers > 1
+        http_srv.start(server_workers)
 
+        # Registers signal handles for graceful server shutdown
         if oz.settings.get("use_graceful_shutdown"):
             if server_type == "asyncio" or server_type == "twisted":
                 print("WARNING: Cannot enable graceful shutdown for asyncio or twisted server types.")
@@ -122,6 +127,7 @@ def server():
                 signal.signal(signal.SIGTERM, functools.partial(_shutdown_tornado_ioloop, http_srv))
                 signal.signal(signal.SIGINT, functools.partial(_shutdown_tornado_ioloop, http_srv))
 
+        # Starts the ioloops
         if server_type == "asyncio":
             import asyncio
             asyncio.get_event_loop().run_forever()
