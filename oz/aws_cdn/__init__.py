@@ -52,7 +52,7 @@ def get_file(path):
     """Gets a file"""
     if oz.settings["s3_bucket"]:
         bucket = get_bucket(oz.settings["s3_bucket"])
-        return S3File(bucket.new_key(path))
+        return S3File(bucket.get_key(path))
     else:
         return LocalFile(oz.settings["static_path"], path)
 
@@ -157,3 +157,10 @@ class S3File(CDNFile):
 
     def remove(self):
         self.key.delete()
+
+    def copy_to(self, new_path):
+        '''
+        Uses boto to copy the file to the new path instead of uploading another file to the new key
+        '''
+        bucket = self.key.bucket
+        bucket.copy_key(new_path, bucket.name, self.key.name)
