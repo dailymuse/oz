@@ -11,6 +11,7 @@ except ImportError:
     S3Connection = None
 
 import os
+import shutil
 import hashlib
 import mimetypes
 from tornado import escape
@@ -130,6 +131,14 @@ class LocalFile(CDNFile):
     def remove(self):
         os.remove(self.full_path)
 
+    def copy(self, new_path, replace=False):
+        """ Uses shutil to copy a file over """
+        if replace or not os.path.exists(new_path):
+            shutil.copyfile(self.full_path, new_path)
+            return True
+        return False
+
+
 class S3File(CDNFile):
     """Specifies a file stored on Amazon S3"""
 
@@ -158,9 +167,9 @@ class S3File(CDNFile):
     def remove(self):
         self.key.delete()
 
-    def copy_to(self, new_path):
-        '''
-        Uses boto to copy the file to the new path instead of uploading another file to the new key
-        '''
-        bucket = self.key.bucket
-        bucket.copy_key(new_path, bucket.name, self.key.name)
+    def copy(self, new_path, replace=False):
+        """Uses boto to copy the file to the new path instead of uploading another file to the new key"""
+        if replace or get_file(new_path).key is None:
+            self.key.copy(self.key.bucket, new_path)
+            return True
+        return False

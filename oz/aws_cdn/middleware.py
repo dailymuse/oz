@@ -53,9 +53,10 @@ class CDNMiddleware(object):
         uploaded.
         """
         f = self.get_file(from_path)
-        self.upload_file(to_path, f.contents(), replace=replace)
+        if f.copy(to_path, replace):
+            self.set_cache_buster(to_path, f.hash())
 
     def remove_file(self, path):
         """Removes the given file"""
-        f = self.get_file(path).remove()
+        self.get_file(path).remove()
         self.remove_cache_buster(path)
