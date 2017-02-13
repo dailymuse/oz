@@ -38,6 +38,11 @@ setup(
         "optfn>=0.4.1"
     ],
 
+    tests_require = [
+        "redis>=2.6.0",
+        "sqlalchemy>=0.7.8"
+    ],
+
     extras_require={
         "oz.aws_cdn": ["boto>=2.9.7"],
         "oz.redis": ["redis>=2.6.0"],
