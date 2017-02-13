@@ -53,7 +53,10 @@ def get_file(path):
     """Gets a file"""
     if oz.settings["s3_bucket"]:
         bucket = get_bucket(oz.settings["s3_bucket"])
-        return S3File(bucket.get_key(path))
+        key = bucket.get_key(path)
+        if not key:
+            key = bucket.new_key(path)
+        return S3File(key)
     else:
         return LocalFile(oz.settings["static_path"], path)
 
