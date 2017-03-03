@@ -11,6 +11,7 @@ class SQLAlchemyMiddleware(object):
     def __init__(self):
         super(SQLAlchemyMiddleware, self).__init__()
         self.trigger_listener("on_finish", self._sqlalchemy_on_finish)
+        self.trigger_listener("on_connection_close", self._sqlalchemy_on_connection_close)
 
     def db(self):
         """Gets the SQLALchemy session for this request"""
@@ -31,5 +32,17 @@ class SQLAlchemyMiddleware(object):
                     self.db_conn.commit()
                 else:
                     self.db_conn.rollback()
+            finally:
+                self.db_conn.close()
+
+    def _sqlalchemy_on_connection_close(self):
+        """
+        Rollsback and closes the active session, since the client disconnected before the request
+        could be completed.
+        """
+
+        if hasattr(self, "db_conn"):
+            try:
+                self.db_conn.rollback()
             finally:
                 self.db_conn.close()
