@@ -2,6 +2,10 @@
 
 from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
 
+import sys
+
+import tornado.log
+
 import oz
 import oz.sqlalchemy
 
@@ -32,6 +36,8 @@ class SQLAlchemyMiddleware(object):
                     self.db_conn.commit()
                 else:
                     self.db_conn.rollback()
+            except:
+                tornado.log.app_log.warning("Error occurred during database transaction cleanup: %s", str(sys.exc_info()[0]))
             finally:
                 self.db_conn.close()
 
@@ -44,5 +50,7 @@ class SQLAlchemyMiddleware(object):
         if hasattr(self, "db_conn"):
             try:
                 self.db_conn.rollback()
+            except:
+                tornado.log.app_log.warning("Error occurred during database transaction cleanup: %s", str(sys.exc_info()[0]))
             finally:
                 self.db_conn.close()
