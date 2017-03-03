@@ -26,9 +26,10 @@ class SQLAlchemyMiddleware(object):
         """
 
         if hasattr(self, "db_conn"):
-            if self.get_status() >= 200 and self.get_status() <= 399:
-                self.db_conn.commit()
-            else:
-                self.db_conn.rollback()
-
-            self.db_conn.close()
+            try:
+                if self.get_status() >= 200 and self.get_status() <= 399:
+                    self.db_conn.commit()
+                else:
+                    self.db_conn.rollback()
+            finally:
+                self.db_conn.close()
