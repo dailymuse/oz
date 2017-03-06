@@ -38,6 +38,7 @@ class SQLAlchemyMiddleware(object):
                     self.db_conn.rollback()
             except:
                 tornado.log.app_log.warning("Error occurred during database transaction cleanup: %s", str(sys.exc_info()[0]))
+                raise
             finally:
                 self.db_conn.close()
 
@@ -52,5 +53,6 @@ class SQLAlchemyMiddleware(object):
                 self.db_conn.rollback()
             except:
                 tornado.log.app_log.warning("Error occurred during database transaction cleanup: %s", str(sys.exc_info()[0]))
+                raise
             finally:
                 self.db_conn.close()
