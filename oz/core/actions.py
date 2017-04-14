@@ -110,6 +110,7 @@ def server():
             if oz.settings["debug"]:
                 print("WARNING: Debug is enabled, but multiple server workers have been configured. Only one server worker can run in debug mode.")
                 server_workers = 1
+                _startup_ptvsd()
             elif (server_type == "asyncio" or server_type == "twisted"):
                 print("WARNING: A non-default server type is being used, but multiple server workers have been configured. Only one server worker can run on a non-default server type.")
                 server_workers = 1
@@ -188,3 +189,22 @@ def _shutdown_tornado_ioloop(http_srv, sig, frame):
 
     tornado.log.app_log.warning("Received %s", sig)
     io_loop.add_callback_from_signal(shutdown)
+
+def _startup_ptvsd():
+    """ Helper method for starting up Visual Studio Code Debugger """
+
+    if os.environ.get("ATTACH_VSCODE_DEBUGGER", default=False):
+        print("Starting Debugger")
+        secret = oz.settings.get("vsc_debugger_secret", "my_secret")
+        address = oz.settings.get("vsc_debugger_address", "0.0.0.0")
+        port = oz.settings.get("vsc_debugger_port", "8007")
+        try:
+            import ptvsd
+            try:
+                ptvsd.enable_attach(secret, address=(address, port))
+                print("Successfully started the debugger on {}:{}".format(address, port))
+            except ptvsd.AttachAlreadyEnabledError:
+                print("WARNING: The debugger has already been enabled and is currently running...")
+                print("If you are experiencing problems try closing the process, restarting VSC, or the server")
+        except:
+            print("ERROR: ptvsd is not installed. Please install it to use the Visual Studio Code debugger.", file=sys.stderr)
