@@ -6,6 +6,10 @@ import oz
 
 oz.options(
     debug = dict(type=bool, default=False, help="Debug mode. Stack traces will be displayed on errors, and the server will automatically reload when server code is changed. This should not be enabled in production."),
+    start_vsc_debugger = dict(type=bool, default=False, help="Visual Studio Code debugger enabled. If this is true, it will attempt to start the debugger service used by Visual Studio Code"),
+    vsc_debugger_secret = dict(type=str, default="my_secret", help="Secret used for attaching to the debugger. Default='my_secret'"),
+    vsc_debugger_address = dict(type=str, default="0.0.0.0", help="Address used for attaching to the debugger. Default='0.0.0.0'"),
+    vsc_debugger_port = dict(type=int, default=8007, help="The port on which to run the debugger service. Default=8007"),
     port = dict(type=int, default=8000, help="The port on which to run the server."),
     static_path = dict(type=str, default=None, help="Path to the static directory. If set to None, then static asset hosting is disabled."),
     template_path = dict(type=str, default="templates", help="Path to the templates directory."),

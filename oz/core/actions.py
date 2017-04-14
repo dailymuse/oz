@@ -193,11 +193,11 @@ def _shutdown_tornado_ioloop(http_srv, sig, frame):
 def _startup_ptvsd():
     """ Helper method for starting up Visual Studio Code Debugger """
 
-    if oz.settings.get("start_vsc_debugger", default=False):
+    if oz.settings["start_vsc_debugger"]:
         print("Starting Debugger")
-        secret = oz.settings.get("vsc_debugger_secret", "my_secret")
-        address = oz.settings.get("vsc_debugger_address", "0.0.0.0")
-        port = oz.settings.get("vsc_debugger_port", "8007")
+        secret = oz.settings["vsc_debugger_secret"]
+        address = oz.settings["vsc_debugger_address"]
+        port = oz.settings["vsc_debugger_port"]
         try:
             import ptvsd
             try:
