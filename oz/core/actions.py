@@ -62,8 +62,11 @@ def init(project_name):
     check_path("config.py", functools.partial(config_maker, project_name))
 
 @oz.action
-def server():
+def server(ptvs_debugger=False):
     """Runs the server"""
+    # Run debugger if specified
+    if ptvs_debugger:
+        _startup_ptvsd()
 
     # Get and validate the server_type
     server_type = oz.settings["server_type"]
@@ -110,7 +113,6 @@ def server():
             if oz.settings["debug"]:
                 print("WARNING: Debug is enabled, but multiple server workers have been configured. Only one server worker can run in debug mode.")
                 server_workers = 1
-                _startup_ptvsd()
             elif (server_type == "asyncio" or server_type == "twisted"):
                 print("WARNING: A non-default server type is being used, but multiple server workers have been configured. Only one server worker can run on a non-default server type.")
                 server_workers = 1
@@ -157,8 +159,12 @@ def repl():
     ))
 
 @oz.action
-def test(*filters):
+def test(*filters, ptvs_debugger=False):
     """Runs the unit tests"""
+
+    # Run debugger if specified
+    if ptvs_debugger:
+        _startup_ptvsd()
 
     suite = unittest.TestSuite()
     filters_set = set(filters)
