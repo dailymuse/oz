@@ -199,18 +199,17 @@ def _shutdown_tornado_ioloop(http_srv, sig, frame):
 def _startup_ptvsd():
     """ Helper method for starting up Visual Studio Code Debugger """
 
-    if oz.settings["start_vsc_debugger"]:
-        print("Starting Debugger")
-        secret = oz.settings["vsc_debugger_secret"]
-        address = oz.settings["vsc_debugger_address"]
-        port = oz.settings["vsc_debugger_port"]
+    print("Starting Debugger")
+    secret = oz.settings["vsc_debugger_secret"]
+    address = oz.settings["vsc_debugger_address"]
+    port = oz.settings["vsc_debugger_port"]
+    try:
+        import ptvsd
         try:
-            import ptvsd
-            try:
-                ptvsd.enable_attach(secret, address=(address, port))
-                print("Successfully started the debugger on {}:{}".format(address, port))
-            except ptvsd.AttachAlreadyEnabledError:
-                print("WARNING: The debugger has already been enabled and is currently running...")
-                print("If you are experiencing problems try closing the process, restarting VSC, or the server")
-        except:
-            print("ERROR: ptvsd is not installed. Please install it to use the Visual Studio Code debugger.", file=sys.stderr)
+            ptvsd.enable_attach(secret, address=(address, port))
+            print("Successfully started the debugger on {}:{}".format(address, port))
+        except ptvsd.AttachAlreadyEnabledError:
+            print("WARNING: The debugger has already been enabled and is currently running...")
+            print("If you are experiencing problems try closing the process, restarting VSC, or the server")
+    except:
+        print("ERROR: ptvsd is not installed. Please install it to use the Visual Studio Code debugger.", file=sys.stderr)
