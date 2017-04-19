@@ -22,13 +22,22 @@ class RedisSessionMiddleware(object):
                 except:
                     pass
 
-            if not session_id:
+            if session_id is None:
                 session_id = oz.redis_sessions.random_hex(20)
-                self.set_secure_cookie(
-                    name="session_id",
-                    value=session_id.encode('utf-8'),
-                    domain=oz.settings.get("cookie_domain"),
-                    httponly=True)
+
+            session_time = oz.settings["session_time"]
+            if session_time:
+                expires_days = session_time/60/60/24
+            else:
+                expires_days = 30
+
+            self.set_secure_cookie(
+                name="session_id",
+                value=session_id.encode('utf-8'),
+                domain=oz.settings.get("cookie_domain"),
+                httponly=True,
+                expires_days=expires_days,)
+
 
             password_salt = oz.settings["session_salt"]
             self._cached_session_key = "session:%s:v4" % oz.redis_sessions.password_hash(session_id, password_salt=password_salt)
