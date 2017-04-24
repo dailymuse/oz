@@ -24,11 +24,18 @@ class RedisSessionMiddleware(object):
 
             if not session_id:
                 session_id = oz.redis_sessions.random_hex(20)
-                self.set_secure_cookie(
-                    name="session_id",
-                    value=session_id.encode('utf-8'),
-                    domain=oz.settings.get("cookie_domain"),
-                    httponly=True)
+
+            session_time = oz.settings["session_time"]
+            kwargs = dict(
+                name="session_id",
+                value=session_id.encode('utf-8'),
+                domain=oz.settings.get("cookie_domain"),
+                httponly=True,
+            )
+            if session_time:
+                kwargs["expires_days"] = round(session_time/60/60/24)
+
+            self.set_secure_cookie(**kwargs)
 
             password_salt = oz.settings["session_salt"]
             self._cached_session_key = "session:%s:v4" % oz.redis_sessions.password_hash(session_id, password_salt=password_salt)
