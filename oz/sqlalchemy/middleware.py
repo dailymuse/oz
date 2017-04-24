@@ -17,30 +17,40 @@ class SQLAlchemyMiddleware(object):
         self.trigger_listener("on_finish", self._sqlalchemy_on_finish)
         self.trigger_listener("on_connection_close", self._sqlalchemy_on_connection_close)
 
-    def db(self):
+    def db(self, connection_string=None):
         """Gets the SQLALchemy session for this request"""
 
-        if not hasattr(self, "db_conn"):
-            self.db_conn = oz.sqlalchemy.session()
+        connection_string = connection_string or self.settings["db"]
 
-        return self.db_conn
+        if not hasattr(self, "_db_conns"):
+            self._db_conns = {}
+        if not connection_string in self._db_conns:
+            self._db_conns[connection_string] = oz.sqlalchemy.session(connection_string=connection_string)
+
+        return self._db_conns[connection_string]
 
     def _sqlalchemy_on_finish(self):
         """
         Closes the sqlalchemy transaction. Rolls back if an error occurred.
         """
 
-        if hasattr(self, "db_conn"):
+        if hasattr(self, "_db_conns"):
             try:
                 if self.get_status() >= 200 and self.get_status() <= 399:
-                    self.db_conn.commit()
+                    for db_conn in self._db_conns.values():
+                        db_conn.commit()
                 else:
-                    self.db_conn.rollback()
+                    for db_conn in self._db_conns.values():
+                        db_conn.rollback()
             except:
                 tornado.log.app_log.warning("Error occurred during database transaction cleanup: %s", str(sys.exc_info()[0]))
                 raise
             finally:
-                self.db_conn.close()
+                for db_conn in self._db_conns.values():
+                    try:
+                        db_conn.close()
+                    except:
+                        tornado.log.app_log.warning("Error occurred when closing the database connection", exc_info=True)
 
     def _sqlalchemy_on_connection_close(self):
         """
@@ -48,11 +58,16 @@ class SQLAlchemyMiddleware(object):
         could be completed.
         """
 
-        if hasattr(self, "db_conn"):
+        if hasattr(self, "_db_conns"):
             try:
-                self.db_conn.rollback()
+                for db_conn in self._db_conns.values():
+                    db_conn.rollback()
             except:
                 tornado.log.app_log.warning("Error occurred during database transaction cleanup: %s", str(sys.exc_info()[0]))
                 raise
             finally:
-                self.db_conn.close()
+                for db_conn in self._db_conns.values():
+                    try:
+                        db_conn.close()
+                    except:
+                        tornado.log.app_log.warning("Error occurred when closing the database connection", exc_info=True)

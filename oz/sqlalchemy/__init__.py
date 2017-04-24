@@ -6,7 +6,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm.session import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from multiprocessing.util import register_after_fork
-import tornado.options
 import oz
 
 from .actions import *
@@ -14,8 +13,8 @@ from .middleware import *
 from .options import *
 
 Base = declarative_base()
-_engine = None
-_session = None
+_engines = dict()
+_session_makers = dict()
 
 class _AfterFork(object):
     """
@@ -26,26 +25,29 @@ class _AfterFork(object):
     registered = False
 
     def __call__(self):
-        global _engine
-        global _session
+        global _engines
+        global _session_makers
 
         # Child must reregister
         self.registered = False
 
-        _engine.dispose()
-        _engine = None
-        _session = None
+        for engine in _engines.values():
+            engine.dispose()
+
+        _engines = dict()
+        _session_makers = dict()
 
 after_fork = _AfterFork()
 
-def setup():
+def setup(connection_string=None):
     """Initializes the tables if they don't exist already"""
-    return Base.metadata.create_all(engine())
+    return Base.metadata.create_all(engine(connection_string=connection_string))
 
-def engine():
-    global _engine
+def engine(connection_string=None):
+    global _engines
+    connection_string = connection_string or oz.settings["db"]
 
-    if _engine == None:
+    if connection_string not in _engines:
         kwargs = dict(echo=oz.settings["debug_sql"])
 
         if oz.settings["db_pool_size"]:
@@ -55,17 +57,21 @@ def engine():
         if oz.settings["db_pool_timeout"]:
             kwargs["pool_timeout"] = oz.settings["db_pool_timeout"]
 
-        _engine = create_engine(oz.settings["db"], **kwargs)
-        after_fork.registered = True
-        register_after_fork(after_fork, after_fork)
+        first_engine = len(_engines) == 0
+        _engines[connection_string] = create_engine(connection_string, **kwargs)
 
-    return _engine
+        if first_engine:
+            after_fork.registered = True
+            register_after_fork(after_fork, after_fork)
 
-def session():
+    return _engines[connection_string]
+
+def session(connection_string=None):
     """Gets a SQLAlchemy session"""
-    global _session
+    global _session_makers
+    connection_string = connection_string or oz.settings["db"]
 
-    if _session == None:
-        _session = sessionmaker(bind=engine())
+    if not connection_string in _session_makers:
+        _session_makers[connection_string] = sessionmaker(bind=engine(connection_string=connection_string))
 
-    return _session()
+    return _session_makers[connection_string]()
