@@ -13,8 +13,8 @@ from .middleware import *
 from .options import *
 
 Base = declarative_base()
-_engines = {}
-_session_makers = {}
+_engines = dict()
+_session_makers = dict()
 
 class _AfterFork(object):
     """
@@ -34,8 +34,8 @@ class _AfterFork(object):
         for engine in _engines.values():
             engine.dispose()
 
-        _engines = {}
-        _session_makers = {}
+        _engines = dict()
+        _session_makers = dict()
 
 after_fork = _AfterFork()
 
