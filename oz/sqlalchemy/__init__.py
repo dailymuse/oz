@@ -47,7 +47,7 @@ def engine(connection_string=None):
     global _engines
     connection_string = connection_string or oz.settings["db"]
 
-    if not connection_string in _engines:
+    if connection_string not in _engines:
         kwargs = dict(echo=oz.settings["debug_sql"])
 
         if oz.settings["db_pool_size"]:
