@@ -50,7 +50,7 @@ class SQLAlchemyMiddleware(object):
                     try:
                         db_conn.close()
                     except:
-                        pass
+                        tornado.log.app_log.warning("Error occurred when closing the database connection", exc_info=True)
 
     def _sqlalchemy_on_connection_close(self):
         """
@@ -70,4 +70,4 @@ class SQLAlchemyMiddleware(object):
                     try:
                         db_conn.close()
                     except:
-                        pass
+                        tornado.log.app_log.warning("Error occurred when closing the database connection", exc_info=True)
