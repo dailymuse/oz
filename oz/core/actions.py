@@ -65,6 +65,8 @@ def init(project_name):
 def server():
     """Runs the server"""
 
+    tornado.log.enable_pretty_logging()
+
     # Get and validate the server_type
     server_type = oz.settings["server_type"]
     if server_type not in [None, "wsgi", "asyncio", "twisted"]:
