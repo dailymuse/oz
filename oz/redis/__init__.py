@@ -17,6 +17,9 @@ def create_connection():
 
     if settings["redis_cache_connections"] and _cached_connection != None:
         return _cached_connection
+    elif "redis_url" in settings:
+        conn = redis.StrictRedis.from_url(settings["redis_url"],
+                                          decode_responses=settings["redis_decode_responses"])
     else:
         conn = redis.StrictRedis(
             host=settings["redis_host"],
@@ -26,7 +29,7 @@ def create_connection():
             decode_responses=settings["redis_decode_responses"],
         )
 
-        if settings["redis_cache_connections"]:
-            _cached_connection = conn
+    if settings["redis_cache_connections"]:
+        _cached_connection = conn
 
-        return conn
+    return conn
