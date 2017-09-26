@@ -24,6 +24,11 @@ def create_connection():
             db=settings["redis_db"],
             password=settings["redis_password"],
             decode_responses=settings["redis_decode_responses"],
+            ssl=settings["redis_use_ssl"],
+            ssl_keyfile=settings["redis_ssl_keyfile"],
+            ssl_certfile=settings["redis_ssl_certfile"],
+            ssl_cert_reqs=settings["redis_ssl_cert_reqs"],
+            ssl_ca_certs=settings["redis_ssl_ca_certs"]
         )
 
         if settings["redis_cache_connections"]:
