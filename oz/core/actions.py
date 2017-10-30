@@ -177,8 +177,12 @@ def test(*filters):
 
     res = unittest.TextTestRunner().run(suite)
     cov.stop()
-    cov.html_report(directory='covhtml')
-    print(cov.xml_report())
+    cwd = os.getcwd()
+    print(cwd)
+    cwd = cwd + "/covhtml"
+    cov.html_report(directory=cwd)
+    xml_path = os.getcwd() + "/lol.xml"
+    print(cov.xml_report(outfile=xml_path))
 
     return 1 if len(res.errors) > 0 or len(res.failures) > 0 else 0
 
