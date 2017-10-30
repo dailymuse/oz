@@ -178,6 +178,7 @@ def test(*filters):
     res = unittest.TextTestRunner().run(suite)
     cov.stop()
     cov.html_report(directory='covhtml')
+    print(cov.xml_report())
 
     return 1 if len(res.errors) > 0 or len(res.failures) > 0 else 0
 
