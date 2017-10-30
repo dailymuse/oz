@@ -18,6 +18,8 @@ import tornado.httpserver
 import tornado.ioloop
 import tornado.log
 
+import coverage
+
 import oz
 
 VALID_PROJECT_NAME = re.compile(r"^\w+$")
@@ -170,7 +172,13 @@ def test(*filters):
             child_suite = unittest.makeSuite(t, "test")
             suite.addTest(child_suite)
 
+    cov = coverage.Coverage()
+    cov.start()
+
     res = unittest.TextTestRunner().run(suite)
+    cov.stop()
+    cov.html_report(directory='covhtml')
+
     return 1 if len(res.errors) > 0 or len(res.failures) > 0 else 0
 
 def _shutdown_tornado_ioloop(http_srv, sig, frame):
