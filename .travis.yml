@@ -1,6 +1,10 @@
 # http://travis-ci.org/#!/dailymuse/oz
 
 language: python
+python:
+- "2.7"
+- "3.4"
+- "pypy"
 install:
     - sudo rm -f /etc/boto.cfg
     - pip install tox
