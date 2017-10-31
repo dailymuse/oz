@@ -4,7 +4,7 @@ language: python
 matrix:
   include:
   - python: "2.7"
-    env: TOXENV=py2-tornado322
+    env: TOXENV=py27-tornado322
   - python: "2.7"
     env: TOXENV=py27-tornado401
   - python: "3.4"
