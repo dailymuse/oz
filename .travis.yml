@@ -6,15 +6,15 @@ matrix:
   - python: "2.7"
     env: TOXENV=py27-tornado322
   - python: "2.7"
-    env: TOXENV=py27-tornado401
-  - python: "3.4"
-    env: TOXENV=py34-tornado322
-  - python: "3.4"
-    env: TOXENV=py34-tornado401
+    env: TOXENV=py27-tornado452
+  - python: "3.6"
+    env: TOXENV=py36-tornado322
+  - python: "3.6"
+    env: TOXENV=py36-tornado452
   - python: "pypy"
     env: TOXENV=pypy-tornado322
   - python: "pypy"
-    env: TOXENV=pypy-tornado401
+    env: TOXENV=pypy-tornado452
 before_install:
   - sudo rm -f /etc/boto.cfg
 install:
