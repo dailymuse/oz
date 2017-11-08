@@ -1,16 +1,25 @@
 # http://travis-ci.org/#!/dailymuse/oz
 
 language: python
+matrix:
+  include:
+  - python: "2.7"
+    env: TOXENV=py27-tornado322
+  - python: "2.7"
+    env: TOXENV=py27-tornado452
+  - python: "3.6"
+    env: TOXENV=py36-tornado322
+  - python: "3.6"
+    env: TOXENV=py36-tornado452
+  - python: "pypy"
+    env: TOXENV=pypy-tornado322
+  - python: "pypy"
+    env: TOXENV=pypy-tornado452
+before_install:
+  - sudo rm -f /etc/boto.cfg
 install:
-    - pip install tox
+  - pip install tox
 script:
-    - tox
-env:
-    - TOXENV=py27-tornado322
-    - TOXENV=py27-tornado401
-    - TOXENV=py34-tornado322
-    - TOXENV=py34-tornado401
-    - TOXENV=pypy-tornado322
-    - TOXENV=pypy-tornado401
+  - tox
 services:
-    - redis-server
+  - redis-server
