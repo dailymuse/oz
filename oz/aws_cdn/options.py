@@ -9,4 +9,5 @@ oz.options(
     aws_secret_key = dict(type=str, help="AWS secret key for CDN"),
     static_host = dict(type=str, help="CDN hostname for static assets"),
     s3_bucket = dict(type=str, default=None, help="S3 bucket for uploading CDN assets"),
+    s3_host = dict(type=str, default=None, help="S3 host to use for signature generation")
 )

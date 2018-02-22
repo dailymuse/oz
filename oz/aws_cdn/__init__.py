@@ -45,7 +45,10 @@ def get_bucket(s3_bucket=None, validate=False):
     if S3Connection != None:
         settings = oz.settings
         s3_bucket = s3_bucket or settings["s3_bucket"]
-        return S3Connection(settings["aws_access_key"], settings["aws_secret_key"]).get_bucket(s3_bucket, validate=validate)
+        opts = {}
+        if settings["s3_host"]:
+            opts["host"] = settings["s3_host"]
+        return S3Connection(settings["aws_access_key"], settings["aws_secret_key"], **opts).get_bucket(s3_bucket, validate=validate)
     else:
         raise Exception("S3 not supported in this environment as boto is not installed")
 
