@@ -52,10 +52,13 @@ def get_bucket(s3_bucket=None, validate=False):
     else:
         raise Exception("S3 not supported in this environment as boto is not installed")
 
-def get_file(path):
+def get_file(path, s3_bucket=None):
     """Gets a file"""
-    if oz.settings["s3_bucket"]:
-        bucket = get_bucket(oz.settings["s3_bucket"])
+
+    bucket_name = s3_bucket or oz.settings["s3_bucket"]
+
+    if bucket_name:
+        bucket = get_bucket(bucket_name)
         key = bucket.get_key(path)
         if not key:
             key = bucket.new_key(path)
@@ -102,6 +105,7 @@ class CDNFile(object):
     def remove(self):
         """Removes the given file"""
         raise NotImplementedError()
+
 
 class LocalFile(CDNFile):
     """
