@@ -2,6 +2,9 @@
 
 from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
 
+from ddtrace import patch
+patch(tornado=True)
+
 import types
 import collections
 import tornado.web
@@ -146,6 +149,7 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def on_finish(self):
         self.trigger("on_finish")
+        super().on_finish()
 
     def on_connection_close(self):
         self.trigger("on_connection_close")
