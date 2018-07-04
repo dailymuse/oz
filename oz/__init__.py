@@ -2,15 +2,21 @@
 
 from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
 
-import types
 import collections
+import logging
+import os
+
+try:
+    from ddtrace import patch
+except ImportError:
+    logging.getLogger("oz").debug("Skipped ddtrace because it is not available.", exc_info=True)
+else:
+    patch(tornado=True)
+
 import tornado.web
 import tornado.options
 import tornado.util
 import tornado.log
-import inspect
-import functools
-import os
 
 # On trigger execution, trigger listeners can return this to notify the
 # request handler to cancel execution of the next functions in the trigger
@@ -146,9 +152,11 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def on_finish(self):
         self.trigger("on_finish")
+        super(RequestHandler, self).on_finish()
 
     def on_connection_close(self):
         self.trigger("on_connection_close")
+        super(RequestHandler, self).on_connection_close()
 
     def write_error(self, *args, **kwargs):
         # Call super's implementation of `write_error` unless we hit a
