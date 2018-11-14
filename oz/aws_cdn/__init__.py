@@ -45,14 +45,20 @@ def get_bucket(s3_bucket=None, validate=False):
     if S3Connection != None:
         settings = oz.settings
         s3_bucket = s3_bucket or settings["s3_bucket"]
-        return S3Connection(settings["aws_access_key"], settings["aws_secret_key"]).get_bucket(s3_bucket, validate=validate)
+        opts = {}
+        if settings["s3_host"]:
+            opts["host"] = settings["s3_host"]
+        return S3Connection(settings["aws_access_key"], settings["aws_secret_key"], **opts).get_bucket(s3_bucket, validate=validate)
     else:
         raise Exception("S3 not supported in this environment as boto is not installed")
 
-def get_file(path):
+def get_file(path, s3_bucket=None):
     """Gets a file"""
-    if oz.settings["s3_bucket"]:
-        bucket = get_bucket(oz.settings["s3_bucket"])
+
+    bucket_name = s3_bucket or oz.settings["s3_bucket"]
+
+    if bucket_name:
+        bucket = get_bucket(bucket_name)
         key = bucket.get_key(path)
         if not key:
             key = bucket.new_key(path)
@@ -99,6 +105,7 @@ class CDNFile(object):
     def remove(self):
         """Removes the given file"""
         raise NotImplementedError()
+
 
 class LocalFile(CDNFile):
     """
