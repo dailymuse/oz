@@ -21,6 +21,14 @@ from .middleware import *
 from .options import *
 from .uimodules import *
 
+
+def full_path(path, s3_prefix=None):
+    """Return `path` with the s3_prefix applied."""
+    prefix = s3_prefix or oz.settings["s3_prefix"]
+    if prefix:
+        path = "%s/%s" % (prefix, path)
+    return path
+
 def static_url(redis, path):
     """Gets the static path for a file"""
     file_hash = get_cache_buster(redis, path)
@@ -28,15 +36,15 @@ def static_url(redis, path):
 
 def get_cache_buster(redis, path):
     """Gets the cache buster value for a given file path"""
-    return escape.to_unicode(redis.hget("cache-buster:{}:v3".format(oz.settings["s3_bucket"]), path))
+    return escape.to_unicode(redis.hget("cache-buster:{}:v3".format(oz.settings["s3_bucket"]), full_path(path)))
 
 def set_cache_buster(redis, path, hash):
     """Sets the cache buster value for a given file path"""
-    redis.hset("cache-buster:{}:v3".format(oz.settings["s3_bucket"]), path, hash)
+    redis.hset("cache-buster:{}:v3".format(oz.settings["s3_bucket"]), full_path(path), hash)
 
 def remove_cache_buster(redis, path):
     """Removes the cache buster for a given file"""
-    redis.hdel("cache-buster:{}:v3".format(oz.settings["s3_bucket"]), path)
+    redis.hdel("cache-buster:{}:v3".format(oz.settings["s3_bucket"]), full_path(path))
 
 def get_bucket(s3_bucket=None, validate=False):
     """Gets a bucket from specified settings"""
@@ -55,13 +63,14 @@ def get_bucket(s3_bucket=None, validate=False):
     else:
         raise Exception("S3 not supported in this environment as boto is not installed")
 
-def get_file(path, s3_bucket=None):
+def get_file(path, s3_bucket=None, s3_prefix=None):
     """Gets a file"""
 
     bucket_name = s3_bucket or oz.settings["s3_bucket"]
 
     if bucket_name:
         bucket = get_bucket(bucket_name)
+        path = full_path(path, s3_prefix)
         key = bucket.get_key(path)
         if not key:
             key = bucket.new_key(path)
