@@ -1,6 +1,6 @@
 from setuptools import setup
 
-VERSION = "1.2.3"
+VERSION = "1.3.0"
 
 setup(
     name="Oz",
@@ -39,7 +39,7 @@ setup(
     ],
 
     extras_require={
-        "oz.aws_cdn": ["boto>=2.9.7"],
+        "oz.aws_cdn": ["boto>=2.47.0"],
         "oz.redis": ["redis>=2.6.0"],
         "oz.sqlalchemy": ["sqlalchemy>=0.7.8"],
         "datadog": ["ddtrace>=0.12.1"]
